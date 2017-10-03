@@ -3,8 +3,6 @@ name := "biopet-common-utils"
 
 scalaVersion := "2.11.11"
 
-resolvers += Resolver.mavenLocal
-
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 libraryDependencies += "commons-io" % "commons-io" % "2.1"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.3"

@@ -27,11 +27,11 @@ node('local') {
         }
 
         if (env.BRANCH_NAME == 'develop') stage('Publish') {
-            sh "${tool name: 'sbt 0.13.15', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt publishLocal"
+            sh "${tool name: 'sbt 0.13.15', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt publishSigned"
         }
 
         if (env.BRANCH_NAME == 'master') stage('Publish') {
-            sh "${tool name: 'sbt 0.13.15', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt publishLocal"
+            sh "${tool name: 'sbt 0.13.15', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt publishSigned"
         }
 
         if (currentBuild.result == null || "SUCCESS" == currentBuild.result) {
