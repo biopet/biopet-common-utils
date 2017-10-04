@@ -25,7 +25,8 @@ object Question {
              possibleValues: List[String] = Nil,
              validation: List[(String) => Boolean] = Nil): String = {
     description.foreach(println)
-    if (possibleValues.nonEmpty) println(s"possible values: ${possibleValues.mkString(", ")}")
+    if (possibleValues.nonEmpty)
+      println(s"possible values: ${possibleValues.mkString(", ")}")
     default.foreach(x => println(s"Default value: $x"))
     print(s"$name > ")
     (scala.io.StdIn.readLine.trim, default) match {
@@ -72,7 +73,8 @@ object Question {
            possibleValues: List[String] = Nil,
            validation: (String) => Boolean = _ => true): List[String] = {
     description.foreach(println)
-    if (possibleValues.nonEmpty) println(s"possible values: ${possibleValues.mkString(", ")}")
+    if (possibleValues.nonEmpty)
+      println(s"possible values: ${possibleValues.mkString(", ")}")
     default.foreach(x => println(s"Default value: $x"))
     print(s"$name > ")
     (scala.io.StdIn.readLine.split(",").toList.map(_.trim), default) match {
@@ -84,7 +86,8 @@ object Question {
         if (!a.forall(validation)) {
           println("ERROR: Validation of failed")
           list(name, default, description, possibleValues, validation)
-        } else if (possibleValues.nonEmpty && !a.forall(possibleValues.contains)) {
+        } else if (possibleValues.nonEmpty && !a.forall(
+                     possibleValues.contains)) {
           println("ERROR: Value not allowed")
           list(name, default, description, possibleValues, validation)
         } else a

@@ -28,7 +28,9 @@ object IoUtils {
     copyStreamToFile(new FileInputStream(in), out, createDirs)
   }
 
-  def copyStreamToFile(in: InputStream, out: File, createDirs: Boolean = false): Unit = {
+  def copyStreamToFile(in: InputStream,
+                       out: File,
+                       createDirs: Boolean = false): Unit = {
     if (createDirs) out.getParentFile.mkdirs()
     val os = new FileOutputStream(out)
 
@@ -42,7 +44,8 @@ object IoUtils {
     externalDir.mkdirs()
     for (srcFile <- inputDir.listFiles) {
       if (srcFile.isDirectory)
-        copyDir(new File(inputDir, srcFile.getName), new File(externalDir, srcFile.getName))
+        copyDir(new File(inputDir, srcFile.getName),
+                new File(externalDir, srcFile.getName))
       else {
         val newFile = new File(externalDir, srcFile.getName)
         copyFile(srcFile, newFile)
@@ -65,7 +68,8 @@ object IoUtils {
     * @param exts Possible compression extensions to trim.
     * @return Filename without compression extension.
     */
-  def getUncompressedFileName(f: File, exts: Set[String] = zipExtensions): String =
+  def getUncompressedFileName(f: File,
+                              exts: Set[String] = zipExtensions): String =
     exts.foldLeft(f.getName) { (fname, ext) =>
       if (fname.toLowerCase.endsWith(ext)) fname.dropRight(ext.length)
       else fname

@@ -92,7 +92,8 @@ trait Sys {
     val stderr = new OutputSlurper
 
     Try {
-      val proc = Process(cmd).run(ProcessLogger(stdout.appendLine, stderr.appendLine))
+      val proc =
+        Process(cmd).run(ProcessLogger(stdout.appendLine, stderr.appendLine))
       proc.exitValue()
     }.map((_, stdout.get, stderr.get))
       .recover {
@@ -110,7 +111,8 @@ trait Sys {
     *
     * @return [[AsyncExecResult]]
     */
-  def execAsync(cmd: Seq[String])(implicit ec: ExecutionContext): AsyncExecResult = {
+  def execAsync(cmd: Seq[String])(
+      implicit ec: ExecutionContext): AsyncExecResult = {
     while (cache.size >= maxRunningProcesses) {
       for ((cmd, c) <- cache.toList) {
         val results = Option(c)
@@ -120,7 +122,8 @@ trait Sys {
           case _: NullPointerException =>
         } else
           try {
-            results.foreach(x => Await.ready(x.get, Duration.fromNanos(100000)))
+            results.foreach(x =>
+              Await.ready(x.get, Duration.fromNanos(100000)))
           } catch {
             case _: TimeoutException =>
           }
@@ -133,7 +136,8 @@ trait Sys {
 
       override def foreach(f: ExecResult => Unit): Unit = fut.foreach(f)
 
-      override def onComplete[T](pf: Try[ExecResult] => T): Unit = fut.onComplete(pf)
+      override def onComplete[T](pf: Try[ExecResult] => T): Unit =
+        fut.onComplete(pf)
 
       override def cancel(): Unit = cancelFut()
 
@@ -155,8 +159,10 @@ trait Sys {
     val stderr = new OutputSlurper
 
     // start the process
-    val proc = Process(cmd).run(ProcessLogger(stdout.appendLine, stderr.appendLine))
-    p.tryCompleteWith(Future(proc.exitValue).map(c => (c, stdout.get, stderr.get)))
+    val proc =
+      Process(cmd).run(ProcessLogger(stdout.appendLine, stderr.appendLine))
+    p.tryCompleteWith(
+      Future(proc.exitValue).map(c => (c, stdout.get, stderr.get)))
 
     val cancel = () => {
       p.tryFailure {

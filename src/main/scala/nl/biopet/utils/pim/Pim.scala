@@ -2,7 +2,6 @@ package nl.biopet.utils.pim
 
 import play.api.libs.json.{JsValue, Json}
 
-
 /**
   * Created by pjvanthof on 17/03/2017.
   */
@@ -29,7 +28,10 @@ case class Run(id: String,
   )
 }
 
-case class Network(description: String, groups: List[Group], nodes: List[Node], links: List[Link])
+case class Network(description: String,
+                   groups: List[Group],
+                   nodes: List[Node],
+                   links: List[Link])
     extends PimClasses {
   def toMap = Map(
     "description" -> description,
@@ -39,7 +41,8 @@ case class Network(description: String, groups: List[Group], nodes: List[Node], 
   )
 }
 
-case class Group(description: String, id: String, parentGroup: String) extends PimClasses {
+case class Group(description: String, id: String, parentGroup: String)
+    extends PimClasses {
   def toMap = Map(
     "id" -> id,
     "description" -> description,
