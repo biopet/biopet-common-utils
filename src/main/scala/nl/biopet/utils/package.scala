@@ -10,9 +10,12 @@ package object utils {
 
   def textToSize(text: String): Long = {
     text.last match {
-      case 'g' | 'G' => ((1L << 30) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
-      case 'm' | 'M' => ((1L << 20) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
-      case 'k' | 'K' => ((1L << 10) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
+      case 'g' | 'G' =>
+        ((1L << 30) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
+      case 'm' | 'M' =>
+        ((1L << 20) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
+      case 'k' | 'K' =>
+        ((1L << 10) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
       case _ => text.toLong
     }
   }
@@ -25,13 +28,15 @@ package object utils {
       .mkString("")
 
   /** Split camelcase to separated words */
-  def camelizeToWords(string: String, current: List[String] = Nil): List[String] = {
+  def camelizeToWords(string: String,
+                      current: List[String] = Nil): List[String] = {
     if (string.nonEmpty) {
       val char = string.tail.find(!_.isLower)
       char match {
         case Some(c) =>
           val index = string.indexOf(c, 1)
-          camelizeToWords(string.drop(index), current ::: List(string.take(index)))
+          camelizeToWords(string.drop(index),
+                          current ::: List(string.take(index)))
         case _ => current ::: List(string)
       }
     } else current
