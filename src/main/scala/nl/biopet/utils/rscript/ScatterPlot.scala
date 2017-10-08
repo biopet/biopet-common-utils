@@ -31,7 +31,7 @@ case class ScatterPlot(input: File,
                        title: Option[String] = None,
                        removeZero: Boolean = false)
     extends Rscript {
-  protected var scriptPath: String = "plotScatter.R"
+  protected def scriptPath: String = "plotScatter.R"
 
   override def cmd: Seq[String] =
     super.cmd ++

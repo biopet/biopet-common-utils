@@ -30,7 +30,7 @@ case class StackedBarPlot(input: File,
                           llabel: Option[String] = None,
                           title: Option[String] = None)
     extends Rscript {
-  protected var scriptPath: String = "stackedBar.R"
+  protected def scriptPath: String = "stackedBar.R"
 
   override def cmd: Seq[String] =
     super.cmd ++

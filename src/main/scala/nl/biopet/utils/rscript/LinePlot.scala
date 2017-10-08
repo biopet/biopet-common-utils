@@ -36,7 +36,7 @@ case class LinePlot(input: File,
                     xLog10AxisTicks: Seq[String] = Seq(),
                     xLog10AxisLabels: Seq[String] = Seq())
     extends Rscript {
-  protected val scriptPath = "plotXY.R"
+  protected def scriptPath: String = "plotXY.R"
 
   override def cmd: Seq[String] =
     super.cmd ++
