@@ -8,7 +8,7 @@ import scala.collection.mutable
   * Created by pjvanthof on 05/07/16.
   */
 class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
-    implicit ord: Ordering[T]) {
+    implicit ord: Ordering[T]) extends Serializable {
   protected[Counts] val counts: mutable.Map[T, Long] = mutable.Map() ++ _counts
 
   /** Returns histogram as map */
