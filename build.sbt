@@ -8,6 +8,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 libraryDependencies += "commons-io" % "commons-io" % "2.1"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.3"
+libraryDependencies += "org.yaml" % "snakeyaml" % "1.17"
 
 libraryDependencies += "com.github.biopet" %% "biopet-test-utils" % "0.1-SNAPSHOT" % Test changing()
 
