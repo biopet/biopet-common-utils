@@ -1,6 +1,22 @@
 organization := "com.github.biopet"
 name := "common-utils"
 
+homepage := Some(url("https://github.com/biopet/common-utils"))
+licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
+
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/biopet/common-utils"),
+    "scm:git@github.com:biopet/common-utils.git"
+  )
+)
+
+developers := List(
+  Developer(id="ffinfo", name="Peter van 't Hof", email="pjrvanthof@gmail.com", url=url("https://github.com/ffinfo"))
+)
+
+publishMavenStyle := true
+
 scalaVersion := "2.11.11"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
@@ -10,7 +26,7 @@ libraryDependencies += "commons-io" % "commons-io" % "2.1"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.3"
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.17"
 
-libraryDependencies += "com.github.biopet" %% "test-utils" % "0.1-SNAPSHOT" % Test changing()
+libraryDependencies += "com.github.biopet" %% "test-utils" % "0.1" % Test
 
 useGpg := true
 
@@ -24,6 +40,10 @@ publishTo := {
 
 import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
+  releaseStepCommand("git fetch"),
+  releaseStepCommand("git checkout master"),
+  releaseStepCommand("git pull"),
+  releaseStepCommand("git merge origin/develop"),
   checkSnapshotDependencies,
   inquireVersions,
   runClean,
@@ -32,8 +52,11 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommand("publishSigned"),
+  releaseStepCommand("sonatypeReleaseAll"),
+  pushChanges,
+  releaseStepCommand("git checkout develop"),
+  releaseStepCommand("git merge master"),
   setNextVersion,
   commitNextVersion,
-  releaseStepCommand("sonatypeReleaseAll"),
   pushChanges
 )
