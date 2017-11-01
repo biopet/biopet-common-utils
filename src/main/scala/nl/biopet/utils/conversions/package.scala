@@ -20,7 +20,7 @@ package object conversions {
   def mergeMaps(map1: Map[String, Any],
                 map2: Map[String, Any],
                 resolveConflict: (Any, Any, String) => Any = (m1, _, _) => m1)
-    : Map[String, Any] = {
+  : Map[String, Any] = {
     (for (key <- map1.keySet.++(map2.keySet)) yield {
       if (!map2.contains(key)) key -> map1(key)
       else if (!map1.contains(key)) key -> map2(key)
@@ -51,7 +51,7 @@ package object conversions {
 
   /** Convert nested java hash map to scala hash map */
   def nestedJavaHashMaptoScalaMap(
-      input: java.util.LinkedHashMap[_, _]): Map[String, Any] = {
+                                   input: java.util.LinkedHashMap[_, _]): Map[String, Any] = {
     input
       .map(value => {
         value._2 match {
@@ -107,6 +107,7 @@ package object conversions {
     * As scala ints and floats cannot be directly cast to java objects (they aren't objects),
     * we need to box them.
     * For items not Int, Float or Object, we assume them to be strings (TODO: sane assumption?)
+    *
     * @param array scala List[Any]
     * @return converted java ArrayList[Object]
     */
@@ -126,6 +127,14 @@ package object conversions {
       case x => out.add(x.toString)
     }
     out
+  }
+
+  def anyToDoubleList(value: Any): List[Double] = {
+    (value match {
+      case l: List[_] => l
+      case l: util.ArrayList[_] => l.toList
+      case l => l :: Nil
+    }).map(_.toString.toDouble)
   }
 
 }
