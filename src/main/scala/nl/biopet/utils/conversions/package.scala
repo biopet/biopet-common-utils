@@ -20,7 +20,7 @@ package object conversions {
   def mergeMaps(map1: Map[String, Any],
                 map2: Map[String, Any],
                 resolveConflict: (Any, Any, String) => Any = (m1, _, _) => m1)
-  : Map[String, Any] = {
+    : Map[String, Any] = {
     (for (key <- map1.keySet.++(map2.keySet)) yield {
       if (!map2.contains(key)) key -> map1(key)
       else if (!map1.contains(key)) key -> map2(key)
@@ -51,7 +51,7 @@ package object conversions {
 
   /** Convert nested java hash map to scala hash map */
   def nestedJavaHashMaptoScalaMap(
-                                   input: java.util.LinkedHashMap[_, _]): Map[String, Any] = {
+      input: java.util.LinkedHashMap[_, _]): Map[String, Any] = {
     input
       .map(value => {
         value._2 match {
@@ -111,7 +111,8 @@ package object conversions {
     * @param array scala List[Any]
     * @return converted java ArrayList[Object]
     */
-  def scalaListToJavaObjectArrayList(array: List[Any]): util.ArrayList[Object] = {
+  def scalaListToJavaObjectArrayList(
+      array: List[Any]): util.ArrayList[Object] = {
     val out = new util.ArrayList[Object]()
 
     array.foreach {
