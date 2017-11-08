@@ -130,12 +130,23 @@ package object conversions {
     out
   }
 
-  def anyToDoubleList(value: Any): List[Double] = {
-    (value match {
+  def anyToList(value: Any): List[Any] = {
+    value match {
+      case null => Nil
       case l: List[_] => l
       case l: util.ArrayList[_] => l.toList
+      case Some(x) => anyToList(x)
+      case None => Nil
       case l => l :: Nil
-    }).map(_.toString.toDouble)
+    }
+  }
+
+  def anyToDoubleList(value: Any): List[Double] = {
+    anyToList(value).map(_.toString.toDouble)
+  }
+
+  def anyToStringList(value: Any): List[String] = {
+    anyToList(value).map(_.toString)
   }
 
 }
