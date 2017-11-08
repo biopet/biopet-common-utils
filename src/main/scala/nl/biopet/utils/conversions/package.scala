@@ -130,6 +130,7 @@ package object conversions {
     out
   }
 
+  /** Convert value into a scala list */
   def anyToList(value: Any): List[Any] = {
     value match {
       case null => Nil
@@ -141,10 +142,12 @@ package object conversions {
     }
   }
 
+  /** Convert value into a scala List[Double] */
   def anyToDoubleList(value: Any): List[Double] = {
     anyToList(value).map(_.toString.toDouble)
   }
 
+  /** Convert value into a scala List[String] */
   def anyToStringList(value: Any): List[String] = {
     anyToList(value).map(_.toString)
   }
