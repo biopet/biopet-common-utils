@@ -15,9 +15,7 @@
 package nl.biopet.utils
 
 import java.io._
-
 import scala.io.Source
-
 /**
   * This object contains generic io methods
   *
@@ -37,6 +35,16 @@ object IoUtils {
     org.apache.commons.io.IOUtils.copy(in, os)
     os.close()
     in.close()
+  }
+
+  /**
+    * Converts a resource to a file
+    * @param resource Which resource
+    * @param outputFile The output file
+    */
+  def resourceToFile(resource: String, outputFile: File): Unit = {
+    val source = getClass.getResourceAsStream(resource)
+    IoUtils.copyStreamToFile(source, outputFile, createDirs = true)
   }
 
   def copyDir(inputDir: File, externalDir: File): Unit = {
