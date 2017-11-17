@@ -19,6 +19,7 @@ import java.io.{File, IOException, PrintWriter}
 import nl.biopet.utils.rscript.LinePlot
 
 import scala.concurrent.ExecutionContext
+import scala.io.Source
 
 class Histogram[T](_counts: Map[T, Long] = Map[T, Long]())(
     implicit ord: Numeric[T])
@@ -82,5 +83,26 @@ class Histogram[T](_counts: Map[T, Long] = Map[T, Long]())(
           s"Error found while plotting ${plot.output}: ${e.getMessage}")
     }
   }
+}
 
+object Histogram {
+  /** Reading a single histogram from a file */
+  def fromFile[T](file: File, converter: String => T)(implicit ord: Numeric[T]): Histogram[T] = {
+    val map = fromMultiHistogramFile(file, converter)
+    require(map.nonEmpty, s"File does not contain a histogram: $file")
+    require(map.size == 1, s"File has multiple histograms: $file")
+    map.head._2
+  }
+
+  /** Reading Multiple histograms from a single file */
+  def fromMultiHistogramFile[T](file: File, converter: String => T)(implicit ord: Numeric[T]): Map[String, Histogram[T]] = {
+    val reader = Source.fromFile(file)
+    val it = reader.getLines().map(_.split("\t"))
+    val header = it.next().tail.zipWithIndex
+    val values = it.map(x => converter(x.head) -> x.tail.map(x => if (x.nonEmpty) Some(x.toLong) else None)).toMap
+    reader.close()
+    (for ((name, idx) <- header) yield name -> {
+      new Histogram[T](values.flatMap(x => x._2.lift(idx).flatten.map(x._1 -> _)))
+    }).toMap
+  }
 }
