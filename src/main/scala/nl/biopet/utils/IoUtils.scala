@@ -16,6 +16,7 @@ package nl.biopet.utils
 
 import java.io._
 import scala.io.Source
+
 /**
   * This object contains generic io methods
   *
