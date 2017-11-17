@@ -92,4 +92,62 @@ class CountsTest extends TestNGSuite with Matchers {
     reader.getLines().toList shouldBe List("value\tcount", "1\t1", "2\t2", "3\t3")
     reader.close()
   }
+
+  @Test
+  def testWriteMultiCounts(): Unit = {
+    val c1 = new Counts[Int](Map(4 -> 4, 3 -> 1))
+    val c2 = new Counts[Int](Map(5 -> 1, 3 -> 2))
+    val outputFile = File.createTempFile("test.", ".tsv")
+    outputFile.deleteOnExit()
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile)
+    val reader = Source.fromFile(outputFile)
+    val it = reader.getLines()
+    it next() shouldBe "Sample\tc1\tc2"
+    it.next shouldBe "3\t1\t2"
+    it.next shouldBe "4\t4\t"
+    it.next shouldBe "5\t\t1"
+    it.hasNext shouldBe false
+    reader.close()
+  }
+
+  @Test
+  def testWriteMultiCountsReverse(): Unit = {
+    val c1 = new Counts[Int](Map(4 -> 4, 3 -> 1))
+    val c2 = new Counts[Int](Map(5 -> 1, 3 -> 2))
+    val outputFile = File.createTempFile("test.", ".tsv")
+    outputFile.deleteOnExit()
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile, reverse = true)
+    val reader = Source.fromFile(outputFile)
+    val it = reader.getLines()
+    it next() shouldBe "Sample\tc1\tc2"
+    it.next shouldBe "5\t\t1"
+    it.next shouldBe "4\t4\t"
+    it.next shouldBe "3\t1\t2"
+    it.hasNext shouldBe false
+    reader.close()
+  }
+
+  @Test
+  def testWriteMultiCountsAcumolate(): Unit = {
+    val c1 = new Counts[Int](Map(4 -> 4, 3 -> 1))
+    val c2 = new Counts[Int](Map(5 -> 1, 3 -> 2))
+    val outputFile = File.createTempFile("test.", ".tsv")
+    outputFile.deleteOnExit()
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile, acumolate = true)
+    val reader = Source.fromFile(outputFile)
+    val it = reader.getLines()
+    it next() shouldBe "Sample\tc1\tc2"
+    it.next shouldBe "3\t1\t2"
+    it.next shouldBe "4\t5\t"
+    it.next shouldBe "5\t\t3"
+    it.hasNext shouldBe false
+    reader.close()
+  }
+
+  @Test
+  def testAcumolateCounts(): Unit = {
+    val c1 = new Counts[Int](Map(1 -> 1, 2 -> 2, 3 -> 3))
+    c1.acumolateCounts() shouldBe Map(1 -> 1, 2 -> 3, 3 -> 6)
+    c1.acumolateCounts(true) shouldBe Map(1 -> 6, 2 -> 5, 3 -> 3)
+  }
 }

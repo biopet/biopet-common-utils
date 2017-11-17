@@ -70,4 +70,61 @@ class HistogramTest extends TestNGSuite with Matchers {
     reader.getLines().toList shouldBe List("value\tcount", "1\t1", "2\t2", "3\t3")
     reader.close()
   }
+
+  @Test
+  def testAggregateStats(): Unit = {
+    val data: Map[Int, Long] = Map(1 -> 1, 2 -> 2, 3 -> 3)
+    val c1 = new Histogram[Int](data)
+    c1.aggregateStats shouldBe Map("modal" -> 3, "mean" -> 2.3333333333333335, "min" -> 1, "max" -> 3, "median" -> 1)
+  }
+
+  @Test
+  def testAggregateStatsFile(): Unit = {
+    val data: Map[Int, Long] = Map(1 -> 1, 2 -> 2, 3 -> 3)
+    val c1 = new Histogram[Int](data)
+    val outputFile = File.createTempFile("test.", ".txt")
+    outputFile.deleteOnExit()
+    c1.writeAggregateToTsv(outputFile)
+
+    Source.fromFile(outputFile).getLines().toList shouldBe List(
+      "modal\t3",
+      "mean\t2.3333333333333335",
+      "min\t1",
+      "max\t3",
+      "median\t1"
+    )
+  }
+
+  @Test
+  def testRead(): Unit = {
+    val c1 = new Histogram[Int](Map(1 -> 1, 2 -> 2, 3 -> 3))
+    val outputFile = File.createTempFile("test.", ".tsv")
+    outputFile.deleteOnExit()
+    Counts.writeMultipleCounts(Map("c1" -> c1), outputFile)
+
+    Histogram.fromFile(outputFile, _.toInt)
+
+    val histograms = Histogram.fromMultiHistogramFile(outputFile, _.toInt)
+
+    histograms("c1").countsMap shouldBe Map(1 -> 1, 2 -> 2, 3 -> 3)
+    histograms.get("c2") shouldBe None
+  }
+
+  @Test
+  def testReadMulti(): Unit = {
+    val c1 = new Histogram[Int](Map(1 -> 1, 2 -> 2, 3 -> 3))
+    val c2 = new Histogram[Int](Map(1 -> 2, 2 -> 1, 4 -> 2))
+    val outputFile = File.createTempFile("test.", ".tsv")
+    outputFile.deleteOnExit()
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile)
+
+    intercept[IllegalArgumentException] {
+      Histogram.fromFile(outputFile, _.toInt)
+    }.getMessage shouldBe s"requirement failed: File has multiple histograms: $outputFile"
+
+    val histograms = Histogram.fromMultiHistogramFile(outputFile, _.toInt)
+
+    histograms("c1").countsMap shouldBe Map(1 -> 1, 2 -> 2, 3 -> 3)
+    histograms("c2").countsMap shouldBe Map(1 -> 2, 2 -> 1, 4 -> 2)
+  }
 }

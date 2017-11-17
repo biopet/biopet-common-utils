@@ -49,4 +49,39 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
       case _ => false
     }
   }
+
+  /** Returns acumolated counts */
+  def acumolateCounts(reverse: Boolean = false): Map[T, Long] = {
+    val map = countsMap
+    val keys = map.keys.toList.sorted
+    var total = 0L
+    (for (key <- if (reverse) keys.reverse else keys) yield {
+      total += map(key)
+      key -> total
+    }).toMap
+  }
+}
+
+object Counts {
+  /** This will write multiple counts into a single file */
+  def writeMultipleCounts[T](countMap: Map[String, Counts[T]],
+                             outputFile: File,
+                             headerPrefix: String = "Sample",
+                             acumolate: Boolean = false,
+                             reverse: Boolean = false)(implicit ord: Ordering[T]): Unit = {
+    val writer = new PrintWriter(outputFile)
+    writer.println(countMap.keys.mkString(s"$headerPrefix\t", "\t", ""))
+    val keys =
+      countMap.foldLeft(Set[T]())((a, b) => a ++ b._2.counts.keys).toList.sorted
+    val counts = if (acumolate) {
+      countMap.map(x => x._1 -> x._2.acumolateCounts(reverse))
+    } else countMap.map(x => x._1 -> x._2.countsMap)
+    for (value <- if (reverse) keys.reverse else keys) {
+      writer.println(
+        countMap
+          .map(s => counts(s._1).getOrElse(value, ""))
+          .mkString(value + "\t", "\t", ""))
+    }
+    writer.close()
+  }
 }
