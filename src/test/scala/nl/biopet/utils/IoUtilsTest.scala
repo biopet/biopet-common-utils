@@ -54,6 +54,8 @@ class IoUtilsTest extends TestNGSuite with Matchers {
     val temp1= File.createTempFile("test.", ".fa")
     IoUtils.resourceToFile("/fake_chrQ.fa", temp1)
     temp1 should exist
+    val reader = Source.fromFile(temp1)
+    reader.mkString should include ("CGCGAGCTCCTACCAGTCAACGTGATTGATCC")
   }
 
   @Test
