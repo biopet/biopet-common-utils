@@ -22,7 +22,7 @@ object Markdown {
 
     val table = new StringBuffer()
 
-    table.append("<table>\n")
+    table.append("<table class=\"table\">\n")
     table.append(
       headers.mkString("\t<thead>\n\t\t<tr>\n\t\t\t<th>",
                        "</th>\n\t\t\t<th>",
