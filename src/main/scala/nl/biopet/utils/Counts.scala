@@ -56,9 +56,11 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
     val keys = map.keys.toList.sorted
     var total = 0L
     (for (key <- if (reverse) keys.reverse else keys) yield {
-      total += map(key)
-      key -> total
-    }).toMap
+      if (map(key) != 0L) {
+        total += map(key)
+        Some(key -> total)
+      } else None
+    }).flatten.toMap
   }
 }
 
