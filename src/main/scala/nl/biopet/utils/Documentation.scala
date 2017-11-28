@@ -2,6 +2,10 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
+/**
+  * This object contains functions that can be used for writing markdown and html files
+  * for documentation purposes.
+  */
 object Documentation {
 
   /**
@@ -58,6 +62,14 @@ object Documentation {
     }
     fileWriter.close()
   }
+
+  /**
+    * Generates a htmlPage that redirects automatically to the link provided.
+    * @param outputFile The file that will contain the redirect, for example: some_dir/index.html
+    * @param link The file to redirect to, for example: ../index.html
+    * @param title The title of the page.
+    * @param redirectText If javascript does not work, this link text is displayed.
+    */
   def htmlRedirector(
       outputFile: File,
       link: String,
