@@ -2,7 +2,7 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
-object Markdown {
+object Documentation {
 
   /**
     * Returns a HTML table.
@@ -58,5 +58,37 @@ object Markdown {
     }
     fileWriter.close()
   }
-
+  def htmlRedirector(
+    outputDir: File,
+    link: String,
+    filename: String = "index.html",
+    title: String = "Project Documentation",
+    redirectText: String = "Go to the project documentation"
+                    ): Unit = {
+    val fileWriter = new PrintWriter( new File(outputDir,filename))
+    val redirectHtml: String =
+      s"""<!DOCTYPE html>
+         |<html lang="en">
+         |<head>
+         |    <meta charset="UTF-8">
+         |    <title>${title}</title>
+         |    <script language="JavaScript">
+         |        <!--
+         |        function doRedirect()
+         |        {
+         |            window.location.replace("${link}");
+         |        }
+         |        doRedirect();
+         |        //-->
+         |    </script>
+         |</head>
+         |<body>
+         |<a href="${link}">${redirectText}
+         |</a>
+         |</body>
+         |</html>
+       """.stripMargin
+    fileWriter.print(redirectHtml)
+    fileWriter.close()
+  }
 }
