@@ -6,18 +6,18 @@ import java.io.File
 
 import scala.io.Source
 
-class MarkdownTest extends BiopetTest {
+class DocumentationTest extends BiopetTest {
   @Test
   def testTableMethod(): Unit = {
     the [java.lang.IllegalArgumentException] thrownBy {
-      Markdown.htmlTable(
+      Documentation.htmlTable(
         List("Column1", "Column2"),
         List(
           List("1","2"),
           List("a","b","c")
         )
       ) } should have message "requirement failed: Number of items in each row should be equal number of items in header."
-    val table: String = Markdown.htmlTable(List("Column1", "Column2"),
+    val table: String = Documentation.htmlTable(List("Column1", "Column2"),
     List(
       List("1","2"),
       List("a","b")))
@@ -46,7 +46,7 @@ class MarkdownTest extends BiopetTest {
   @Test
   def testContentToFile(): Unit = {
     val testMd = File.createTempFile("test.",".md")
-    Markdown.contentsToMarkdown(List(
+    Documentation.contentsToMarkdown(List(
     ("# Test",
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
   ), testMd
@@ -56,4 +56,39 @@ class MarkdownTest extends BiopetTest {
   reader.mkString should include ("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
   }
 
+  @Test
+  def testHtmlRedirector(): Unit = {
+    val testRedirect = File.createTempFile("test.", ".html")
+    Documentation.htmlRedirector(
+      outputFile = testRedirect,
+      link = "bla/index.html",
+      title = "Project X",
+      redirectText = "Click here for X")
+
+    testRedirect should exist
+    val reader = Source.fromFile(testRedirect)
+    val htmlPage = reader.mkString
+
+    htmlPage should contain
+    """<!DOCTYPE html>
+      |<html lang="en">
+      |<head>
+      |    <meta charset="UTF-8">
+      |    <title>Project X</title>
+      |    <script language="JavaScript">
+      |        <!--
+      |        function doRedirect()
+      |        {
+      |            window.location.replace("bla/index.html");
+      |        }
+      |        doRedirect();
+      |        //-->
+      |    </script>
+      |</head>
+      |<body>
+      |<a href="bla/index.html">Click here for X
+      |</a>
+      |</body>
+      |</html>""".stripMargin
+  }
 }
