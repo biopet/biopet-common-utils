@@ -56,4 +56,39 @@ class DocumentationTest extends BiopetTest {
   reader.mkString should include ("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
   }
 
+  @Test
+  def testHtmlRedirector(): Unit = {
+    val testRedirect = File.createTempFile("test.", ".html")
+    Documentation.htmlRedirector(
+      outputFile = testRedirect,
+      link = "bla/index.html",
+      title = "Project X",
+      redirectText = "Click here for X")
+
+    testRedirect should exist
+    val reader = Source.fromFile(testRedirect)
+    val htmlPage = reader.mkString
+
+    htmlPage should contain
+    """<!DOCTYPE html>
+      |<html lang="en">
+      |<head>
+      |    <meta charset="UTF-8">
+      |    <title>Project X</title>
+      |    <script language="JavaScript">
+      |        <!--
+      |        function doRedirect()
+      |        {
+      |            window.location.replace("bla/index.html");
+      |        }
+      |        doRedirect();
+      |        //-->
+      |    </script>
+      |</head>
+      |<body>
+      |<a href="bla/index.html">Click here for X
+      |</a>
+      |</body>
+      |</html>""".stripMargin
+  }
 }

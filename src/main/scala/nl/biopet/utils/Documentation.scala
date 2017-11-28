@@ -59,13 +59,12 @@ object Documentation {
     fileWriter.close()
   }
   def htmlRedirector(
-    outputDir: File,
-    link: String,
-    filename: String = "index.html",
-    title: String = "Project Documentation",
-    redirectText: String = "Go to the project documentation"
-                    ): Unit = {
-    val fileWriter = new PrintWriter( new File(outputDir,filename))
+      outputFile: File,
+      link: String,
+      title: String = "Project Documentation",
+      redirectText: String = "Go to the project documentation"
+  ): Unit = {
+    val fileWriter = new PrintWriter(outputFile)
     val redirectHtml: String =
       s"""<!DOCTYPE html>
          |<html lang="en">
