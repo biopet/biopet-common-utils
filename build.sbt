@@ -20,6 +20,7 @@ publishMavenStyle := true
 scalaVersion := "2.11.11"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += Resolver.sonatypeRepo("releases")
 
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 libraryDependencies += "commons-io" % "commons-io" % "2.1"
