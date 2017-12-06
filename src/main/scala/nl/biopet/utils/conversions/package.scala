@@ -15,6 +15,7 @@ package object conversions {
     *
     * @param map1 Prio over map2
     * @param map2 Backup for map1
+    * @param resolveConflict This is used to resolve conflicts (value map1, value map1, key). Default choosing value from map1
     * @return merged map
     */
   def mergeMaps(map1: Map[String, Any],
@@ -30,7 +31,7 @@ package object conversions {
             map2(key) match {
               case m2: Map[_, _] =>
                 key -> mergeMaps(any2map(m1), any2map(m2), resolveConflict)
-              case _ => key -> map1(key)
+              case _ => key -> resolveConflict(map1(key), map2(key), key)
             }
           case _ => key -> resolveConflict(map1(key), map2(key), key)
         }
@@ -40,10 +41,10 @@ package object conversions {
 
   /** Convert Any to Map[String, Any] */
   def any2map(any: Any): Map[String, Any] = {
-    if (any == null) return null
     any match {
       case m: Map[_, _] => m.map(x => x._1.toString -> x._2)
       case m: java.util.LinkedHashMap[_, _] => nestedJavaHashMaptoScalaMap(m)
+      case null => null
       case _ =>
         throw new IllegalStateException("Value '" + any + "' is not an Map")
     }
