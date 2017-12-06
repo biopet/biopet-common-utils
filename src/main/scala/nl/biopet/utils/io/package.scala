@@ -36,7 +36,7 @@ package object io {
     for (srcFile <- inputDir.listFiles) {
       if (srcFile.isDirectory)
         copyDir(new File(inputDir, srcFile.getName),
-          new File(externalDir, srcFile.getName))
+                new File(externalDir, srcFile.getName))
       else {
         val newFile = new File(externalDir, srcFile.getName)
         copyFile(srcFile, newFile)
