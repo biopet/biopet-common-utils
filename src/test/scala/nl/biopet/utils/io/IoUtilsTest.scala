@@ -12,13 +12,12 @@
   * license; For commercial users or users who do not want to follow the AGPL
   * license, please contact us to obtain a separate license.
   */
-package nl.biopet.utils
+package nl.biopet.utils.io
 
 import java.io.{File, FileNotFoundException, PrintWriter}
 import java.nio.file.Files
 
-import org.scalatest.Matchers
-import org.scalatest.testng.TestNGSuite
+import nl.biopet.test.BiopetTest
 import org.testng.annotations.Test
 
 import scala.io.Source
@@ -26,7 +25,7 @@ import scala.io.Source
 /**
   * Created by pjvanthof on 05/05/16.
   */
-class IoUtilsTest extends TestNGSuite with Matchers {
+class IoUtilsTest extends BiopetTest {
 
   def createTempTestFile(file: File): Unit = {
     file.getParentFile.mkdirs()
@@ -43,7 +42,7 @@ class IoUtilsTest extends TestNGSuite with Matchers {
     val temp2 = File.createTempFile("test.", ".txt")
     temp2.deleteOnExit()
     createTempTestFile(temp1)
-    IoUtils.copyFile(temp1, temp2)
+    copyFile(temp1, temp2)
     val reader = Source.fromFile(temp2)
     reader.getLines().toList shouldBe List("test")
     reader.close()
@@ -52,7 +51,7 @@ class IoUtilsTest extends TestNGSuite with Matchers {
   @Test
   def testResourceToFile(): Unit = {
     val temp1= File.createTempFile("test.", ".fa")
-    IoUtils.resourceToFile("/fake_chrQ.fa", temp1)
+    resourceToFile("/fake_chrQ.fa", temp1)
     temp1 should exist
     val reader = Source.fromFile(temp1)
     reader.mkString should include ("CGCGAGCTCCTACCAGTCAACGTGATTGATCC")
@@ -67,9 +66,9 @@ class IoUtilsTest extends TestNGSuite with Matchers {
     val temp2 = new File(tempDir, "test.txt")
     createTempTestFile(temp1)
     intercept[FileNotFoundException] {
-      IoUtils.copyFile(temp1, temp2)
+      copyFile(temp1, temp2)
     }
-    IoUtils.copyFile(temp1, temp2, createDirs = true)
+    copyFile(temp1, temp2, createDirs = true)
     val reader = Source.fromFile(temp2)
     reader.getLines().toList shouldBe List("test")
     reader.close()
@@ -93,7 +92,7 @@ class IoUtilsTest extends TestNGSuite with Matchers {
       createTempTestFile(new File(tempDir1, x))
       new File(tempDir2, x) shouldNot exist
     }
-    IoUtils.copyDir(tempDir1, tempDir2)
+    copyDir(tempDir1, tempDir2)
     relativePaths.foreach { x =>
       val file = new File(tempDir2, x)
       file should exist
@@ -101,5 +100,29 @@ class IoUtilsTest extends TestNGSuite with Matchers {
       reader.getLines().toList shouldBe List("test")
       reader.close()
     }
+  }
+
+  @Test
+  def testGetUncompressedFileName(): Unit = {
+    getUncompressedFileName(new File("test.gz")) shouldBe "test"
+  }
+
+  @Test
+  def testGetLinesFromFile(): Unit = {
+    val file = File.createTempFile("test.", ".txt")
+    file.deleteOnExit()
+    val writer = new PrintWriter(file)
+    writer.println("test")
+    writer.close()
+    getLinesFromFile(file) shouldBe List("test")
+  }
+
+  @Test
+  def testWriteLinesToFile(): Unit = {
+    val file = File.createTempFile("test.", ".txt")
+    file.deleteOnExit()
+    writeLinesToFile(file, List("test"))
+
+    getLinesFromFile(file) shouldBe List("test")
   }
 }
