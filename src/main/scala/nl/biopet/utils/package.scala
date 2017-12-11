@@ -13,9 +13,9 @@ package object utils {
       case 'g' | 'G' =>
         ((1L << 30) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
       case 'm' | 'M' =>
-        ((1L << 20) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
+        ((1L << 20) * text.stripSuffix("m").stripSuffix("M").toDouble).toLong
       case 'k' | 'K' =>
-        ((1L << 10) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
+        ((1L << 10) * text.stripSuffix("k").stripSuffix("K").toDouble).toLong
       case _ => text.toLong
     }
   }
@@ -25,7 +25,7 @@ package object utils {
     ustring
       .split("_")
       .map(_.toLowerCase.capitalize)
-      .mkString("")
+      .mkString
 
   /** Split camelcase to separated words */
   def camelizeToWords(string: String,
