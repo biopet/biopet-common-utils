@@ -87,7 +87,7 @@ package object conversions {
 
   /** Convert native scala map to json */
   def mapToJson(map: Map[String, Any]): JsObject = {
-    JsObject.apply(map.map(x => x._1 -> anyToJson(x._2)))
+    JsObject(map.map(x => x._1 -> anyToJson(x._2)))
   }
 
   /** Convert native scala value to json, fall back on .toString if type is not a native scala value */
