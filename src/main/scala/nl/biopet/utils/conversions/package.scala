@@ -78,9 +78,11 @@ package object conversions {
   /** This reads a yaml/json file and convert it to a scala map */
   def yamlFileToMap(file: File): Map[String, Any] = {
     val a = yaml.load(scala.io.Source.fromFile(file).reader())
-    if (a == null)
-      throw new IllegalStateException(s"File '$file' is an empty file")
-    else any2map(a)
+    Option(a) match {
+      case Some(map) => any2map(map)
+      case _ =>
+        throw new IllegalStateException(s"File '$file' is an empty file")
+    }
   }
 
   /** Convert native scala map to json */
