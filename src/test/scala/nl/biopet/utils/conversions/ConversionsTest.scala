@@ -1,6 +1,6 @@
 package nl.biopet.utils.conversions
 
-import java.io.File
+import java.io.{File, PrintWriter}
 import java.util
 
 import nl.biopet.test.BiopetTest
@@ -42,6 +42,24 @@ class ConversionsTest extends BiopetTest {
     anyToDoubleList(List("1","2")) shouldBe List(1.0, 2.0)
     anyToDoubleList(List(1,2)) shouldBe List(1.0, 2.0)
     anyToDoubleList(List(1.0, 2.0)) shouldBe List(1.0, 2.0)
+  }
+
+  @Test
+  def testReadYaml(): Unit = {
+    val outputFile = File.createTempFile("test.", ".yml")
+    val writer = new PrintWriter(outputFile)
+    writer.println("test: test")
+    writer.println("test2: 2")
+    writer.close()
+    yamlFileToMap(outputFile) shouldBe Map("test" -> "test", "test2" -> 2)
+  }
+
+  @Test
+  def testEmptyReadYaml(): Unit = {
+    val outputFile = File.createTempFile("test.", ".yml")
+    intercept[IllegalStateException] {
+      yamlFileToMap(outputFile)
+    }
   }
 
   @Test

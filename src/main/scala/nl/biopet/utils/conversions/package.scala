@@ -75,9 +75,19 @@ package object conversions {
     writer.close()
   }
 
+  /** This reads a yaml/json file and convert it to a scala map */
+  def yamlFileToMap(file: File): Map[String, Any] = {
+    val a = yaml.load(scala.io.Source.fromFile(file).reader())
+    Option(a) match {
+      case Some(map) => any2map(map)
+      case _ =>
+        throw new IllegalStateException(s"File '$file' is an empty file")
+    }
+  }
+
   /** Convert native scala map to json */
   def mapToJson(map: Map[String, Any]): JsObject = {
-    JsObject.apply(map.map(x => x._1 -> anyToJson(x._2)))
+    JsObject(map.map { case (k, v) => k -> anyToJson(v) })
   }
 
   /** Convert native scala value to json, fall back on .toString if type is not a native scala value */
