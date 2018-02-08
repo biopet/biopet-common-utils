@@ -1,4 +1,5 @@
 organization := "com.github.biopet"
+organizationName := "Biopet"
 name := "common-utils"
 
 biopetUrlName := "common-utils"
