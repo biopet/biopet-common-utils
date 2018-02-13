@@ -52,9 +52,9 @@ package object utils {
     a match {
       case ai: Int =>
         b match {
-          case bi: Int => ai < bi
+          case bi: Int    => ai < bi
           case bi: Double => ai < bi
-          case _ => a.toString < b.toString
+          case _          => a.toString < b.toString
         }
       case _ => a.toString < b.toString
     }

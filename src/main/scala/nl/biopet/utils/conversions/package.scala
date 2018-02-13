@@ -42,9 +42,9 @@ package object conversions {
   /** Convert Any to Map[String, Any] */
   def any2map(any: Any): Map[String, Any] = {
     any match {
-      case m: Map[_, _] => m.map(x => x._1.toString -> x._2)
+      case m: Map[_, _]                     => m.map(x => x._1.toString -> x._2)
       case m: java.util.LinkedHashMap[_, _] => nestedJavaHashMaptoScalaMap(m)
-      case null => null
+      case null                             => null
       case _ =>
         throw new IllegalStateException("Value '" + any + "' is not an Map")
     }
@@ -94,21 +94,21 @@ package object conversions {
   def anyToJson(any: Any): JsValue = {
     any match {
       case j: JsValue => j
-      case None => JsNull
-      case Some(x) => anyToJson(x)
+      case None       => JsNull
+      case Some(x)    => anyToJson(x)
       case m: Map[_, _] =>
         mapToJson(m.map(m => m._1.toString -> anyToJson(m._2)))
-      case l: List[_] => JsArray(l.map(anyToJson))
+      case l: List[_]  => JsArray(l.map(anyToJson))
       case l: Array[_] => JsArray(l.map(anyToJson))
-      case b: Boolean => JsBoolean(b)
-      case n: Int => JsNumber(n)
-      case n: Double => JsNumber(n)
-      case n: Long => JsNumber(n)
-      case n: Short => JsNumber(n.toInt)
-      case n: Float => JsNumber(n.toDouble)
-      case n: Byte => JsNumber(n.toInt)
-      case null => JsNull
-      case _ => JsString(any.toString)
+      case b: Boolean  => JsBoolean(b)
+      case n: Int      => JsNumber(n)
+      case n: Double   => JsNumber(n)
+      case n: Long     => JsNumber(n)
+      case n: Short    => JsNumber(n.toInt)
+      case n: Float    => JsNumber(n.toDouble)
+      case n: Byte     => JsNumber(n.toInt)
+      case null        => JsNull
+      case _           => JsString(any.toString)
     }
   }
 
@@ -127,16 +127,16 @@ package object conversions {
     val out = new util.ArrayList[Object]()
 
     array.foreach {
-      case x: Long => out.add(Long.box(x))
-      case x: Int => out.add(Int.box(x))
-      case x: Char => out.add(Char.box(x))
-      case x: Byte => out.add(Byte.box(x))
-      case x: Double => out.add(Double.box(x))
-      case x: Float => out.add(Float.box(x))
+      case x: Long    => out.add(Long.box(x))
+      case x: Int     => out.add(Int.box(x))
+      case x: Char    => out.add(Char.box(x))
+      case x: Byte    => out.add(Byte.box(x))
+      case x: Double  => out.add(Double.box(x))
+      case x: Float   => out.add(Float.box(x))
       case x: Boolean => out.add(Boolean.box(x))
-      case x: String => out.add(x)
-      case x: Object => out.add(x)
-      case x => out.add(x.toString)
+      case x: String  => out.add(x)
+      case x: Object  => out.add(x)
+      case x          => out.add(x.toString)
     }
     out
   }
@@ -144,12 +144,12 @@ package object conversions {
   /** Convert value into a scala list */
   def anyToList(value: Any): List[Any] = {
     value match {
-      case null => Nil
-      case l: List[_] => l
+      case null                 => Nil
+      case l: List[_]           => l
       case l: util.ArrayList[_] => l.toList
-      case Some(x) => anyToList(x)
-      case None => Nil
-      case l => l :: Nil
+      case Some(x)              => anyToList(x)
+      case None                 => Nil
+      case l                    => l :: Nil
     }
   }
 
