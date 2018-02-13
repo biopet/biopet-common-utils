@@ -18,11 +18,10 @@ object Documentation {
   def htmlTable(headers: List[String], body: List[List[String]]): String = {
 
     // Validate that all rows have a length equal to the header
-    body.foreach(
-      row =>
-        require(
-          row.length == headers.length,
-          "Number of items in each row should be equal number of items in header."))
+    body.foreach(row =>
+      require(
+        row.length == headers.length,
+        "Number of items in each row should be equal number of items in header."))
 
     val table = new StringBuffer()
 

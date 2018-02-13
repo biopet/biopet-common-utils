@@ -122,8 +122,7 @@ trait Sys {
           case _: NullPointerException =>
         } else
           try {
-            results.foreach(x =>
-              Await.ready(x.get, Duration.fromNanos(100000)))
+            results.foreach(x => Await.ready(x.get, Duration.fromNanos(100000)))
           } catch {
             case _: TimeoutException =>
           }

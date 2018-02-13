@@ -46,7 +46,7 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   override def equals(other: Any): Boolean = {
     other match {
       case c: Counts[T] => this.counts == c.counts
-      case _ => false
+      case _            => false
     }
   }
 
