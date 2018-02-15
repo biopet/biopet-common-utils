@@ -89,7 +89,10 @@ class CountsTest extends TestNGSuite with Matchers {
     c1.writeHistogramToTsv(tsvFile)
 
     val reader = Source.fromFile(tsvFile)
-    reader.getLines().toList shouldBe List("value\tcount", "1\t1", "2\t2", "3\t3")
+    reader.getLines().toList shouldBe List("value\tcount",
+                                           "1\t1",
+                                           "2\t2",
+                                           "3\t3")
     reader.close()
   }
 
@@ -102,7 +105,7 @@ class CountsTest extends TestNGSuite with Matchers {
     Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile)
     val reader = Source.fromFile(outputFile)
     val it = reader.getLines()
-    it next() shouldBe "Sample\tc1\tc2"
+    it next () shouldBe "Sample\tc1\tc2"
     it.next shouldBe "3\t1\t2"
     it.next shouldBe "4\t4\t"
     it.next shouldBe "5\t\t1"
@@ -116,10 +119,12 @@ class CountsTest extends TestNGSuite with Matchers {
     val c2 = new Counts[Int](Map(5 -> 1, 3 -> 2))
     val outputFile = File.createTempFile("test.", ".tsv")
     outputFile.deleteOnExit()
-    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile, reverse = true)
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2),
+                               outputFile,
+                               reverse = true)
     val reader = Source.fromFile(outputFile)
     val it = reader.getLines()
-    it next() shouldBe "Sample\tc1\tc2"
+    it next () shouldBe "Sample\tc1\tc2"
     it.next shouldBe "5\t\t1"
     it.next shouldBe "4\t4\t"
     it.next shouldBe "3\t1\t2"
@@ -133,10 +138,12 @@ class CountsTest extends TestNGSuite with Matchers {
     val c2 = new Counts[Int](Map(5 -> 1, 3 -> 2))
     val outputFile = File.createTempFile("test.", ".tsv")
     outputFile.deleteOnExit()
-    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2), outputFile, acumolate = true)
+    Counts.writeMultipleCounts(Map("c1" -> c1, "c2" -> c2),
+                               outputFile,
+                               acumolate = true)
     val reader = Source.fromFile(outputFile)
     val it = reader.getLines()
-    it next() shouldBe "Sample\tc1\tc2"
+    it next () shouldBe "Sample\tc1\tc2"
     it.next shouldBe "3\t1\t2"
     it.next shouldBe "4\t5\t"
     it.next shouldBe "5\t\t3"

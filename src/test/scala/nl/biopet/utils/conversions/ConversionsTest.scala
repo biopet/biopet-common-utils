@@ -5,18 +5,25 @@ import java.util
 
 import nl.biopet.test.BiopetTest
 import org.testng.annotations.Test
-import play.api.libs.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString}
+import play.api.libs.json.{
+  JsArray,
+  JsBoolean,
+  JsNull,
+  JsNumber,
+  JsObject,
+  JsString
+}
 
 import scala.io.Source
 
 class ConversionsTest extends BiopetTest {
   @Test
   def testAnyToList(): Unit = {
-    val input1: Any = List(1,2)
+    val input1: Any = List(1, 2)
     anyToList(input1) shouldBe input1
     anyToList(Some(input1)) shouldBe input1
 
-    val input2: Any = List("1",2)
+    val input2: Any = List("1", 2)
     anyToList(input2) shouldBe input2
 
     val input3: Any = "test"
@@ -33,14 +40,14 @@ class ConversionsTest extends BiopetTest {
 
   @Test
   def testAnyToStringList(): Unit = {
-    anyToStringList(List("1","2")) shouldBe List("1", "2")
-    anyToStringList(List(1,2)) shouldBe List("1", "2")
+    anyToStringList(List("1", "2")) shouldBe List("1", "2")
+    anyToStringList(List(1, 2)) shouldBe List("1", "2")
   }
 
   @Test
   def testAnyToDoubleList(): Unit = {
-    anyToDoubleList(List("1","2")) shouldBe List(1.0, 2.0)
-    anyToDoubleList(List(1,2)) shouldBe List(1.0, 2.0)
+    anyToDoubleList(List("1", "2")) shouldBe List(1.0, 2.0)
+    anyToDoubleList(List(1, 2)) shouldBe List(1.0, 2.0)
     anyToDoubleList(List(1.0, 2.0)) shouldBe List(1.0, 2.0)
   }
 
@@ -65,16 +72,22 @@ class ConversionsTest extends BiopetTest {
   @Test
   def testMergeMaps(): Unit = {
     mergeMaps(Map(), Map()) shouldBe Map()
-    mergeMaps(Map("key1" -> 1), Map("key2" -> 2)) shouldBe Map("key1" -> 1, "key2" -> 2)
+    mergeMaps(Map("key1" -> 1), Map("key2" -> 2)) shouldBe Map("key1" -> 1,
+                                                               "key2" -> 2)
 
     mergeMaps(Map("key1" -> 1), Map("key1" -> 2)) shouldBe Map("key1" -> 1)
 
     intercept[IllegalArgumentException] {
-      mergeMaps(Map("key1" -> 1), Map("key1" -> 2), (_, _, _) => throw new IllegalArgumentException) shouldBe Map("key1" -> 1)
+      mergeMaps(Map("key1" -> 1),
+                Map("key1" -> 2),
+                (_, _, _) => throw new IllegalArgumentException) shouldBe Map(
+        "key1" -> 1)
     }
 
-    mergeMaps(Map("map" -> Map("key1" -> 1)), Map("map" -> Map("key2" -> 2))) shouldBe Map("map" -> Map("key1" -> 1, "key2" -> 2))
-    mergeMaps(Map("map" -> Map("key1" -> 1)), Map("map" -> "something else")) shouldBe Map("map" -> Map("key1" -> 1))
+    mergeMaps(Map("map" -> Map("key1" -> 1)), Map("map" -> Map("key2" -> 2))) shouldBe Map(
+      "map" -> Map("key1" -> 1, "key2" -> 2))
+    mergeMaps(Map("map" -> Map("key1" -> 1)), Map("map" -> "something else")) shouldBe Map(
+      "map" -> Map("key1" -> 1))
   }
 
   @Test
@@ -101,10 +114,14 @@ class ConversionsTest extends BiopetTest {
     anyToJson(Some(4L)) shouldBe JsNumber(4L)
     anyToJson(true) shouldBe JsBoolean(true)
     anyToJson("bla") shouldBe JsString("bla")
-    anyToJson(List("bla", 4)) shouldBe JsArray(JsString("bla") :: JsNumber(4) :: Nil)
-    anyToJson(Array("bla", 4)) shouldBe JsArray(JsString("bla") :: JsNumber(4) :: Nil)
-    anyToJson(Map("key" -> "value")) shouldBe JsObject(Seq("key" -> JsString("value")))
-    anyToJson(Map("key" -> Map("key2" -> "value"))) shouldBe JsObject(Seq("key" -> JsObject(Seq("key2" -> JsString("value")))))
+    anyToJson(List("bla", 4)) shouldBe JsArray(
+      JsString("bla") :: JsNumber(4) :: Nil)
+    anyToJson(Array("bla", 4)) shouldBe JsArray(
+      JsString("bla") :: JsNumber(4) :: Nil)
+    anyToJson(Map("key" -> "value")) shouldBe JsObject(
+      Seq("key" -> JsString("value")))
+    anyToJson(Map("key" -> Map("key2" -> "value"))) shouldBe JsObject(
+      Seq("key" -> JsObject(Seq("key2" -> JsString("value")))))
   }
 
   @Test
@@ -113,7 +130,10 @@ class ConversionsTest extends BiopetTest {
     outputFile.deleteOnExit()
     mapToYamlFile(Map("key" -> "value", "key2" -> Map("bla" -> 4)), outputFile)
 
-    Source.fromFile(outputFile).getLines().toList shouldBe List("key: value", "key2: {bla: 4}", "")
+    Source.fromFile(outputFile).getLines().toList shouldBe List(
+      "key: value",
+      "key2: {bla: 4}",
+      "")
   }
 
   @Test
@@ -131,7 +151,15 @@ class ConversionsTest extends BiopetTest {
     result.add(Boolean.box(true))
     result.add("bla")
     result.add(Bla())
-    scalaListToJavaObjectArrayList(List(4, 4.toChar, 4.toByte, 4L, 4.0, 4.0f, true, "bla", Bla())) shouldBe result
+    scalaListToJavaObjectArrayList(List(4,
+                                        4.toChar,
+                                        4.toByte,
+                                        4L,
+                                        4.0,
+                                        4.0f,
+                                        true,
+                                        "bla",
+                                        Bla())) shouldBe result
   }
 
   @Test
@@ -142,6 +170,8 @@ class ConversionsTest extends BiopetTest {
     map2.put("key", "value")
     map.put("key2", map2)
 
-    nestedJavaHashMaptoScalaMap(map) shouldBe Map("key" -> "value", "key2" -> Map("key" -> "value"))
+    nestedJavaHashMaptoScalaMap(map) shouldBe Map(
+      "key" -> "value",
+      "key2" -> Map("key" -> "value"))
   }
 }

@@ -50,17 +50,18 @@ class IoUtilsTest extends BiopetTest {
 
   @Test
   def testResourceToFile(): Unit = {
-    val temp1= File.createTempFile("test.", ".fa")
+    val temp1 = File.createTempFile("test.", ".fa")
     resourceToFile("/fake_chrQ.fa", temp1)
     temp1 should exist
     val reader = Source.fromFile(temp1)
-    reader.mkString should include ("CGCGAGCTCCTACCAGTCAACGTGATTGATCC")
+    reader.mkString should include("CGCGAGCTCCTACCAGTCAACGTGATTGATCC")
   }
 
   @Test
   def testCopyFileNonExistingDir(): Unit = {
     val temp1 = File.createTempFile("test.", ".txt")
-    val tempDir = new File(Files.createTempDirectory("test").toFile, "non-exist")
+    val tempDir =
+      new File(Files.createTempDirectory("test").toFile, "non-exist")
     tempDir.deleteOnExit()
     tempDir shouldNot exist
     val temp2 = new File(tempDir, "test.txt")

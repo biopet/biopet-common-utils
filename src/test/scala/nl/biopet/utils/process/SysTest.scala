@@ -63,5 +63,4 @@ class SysTest extends BiopetTest {
     process.cancel()
   }
 
-
 }

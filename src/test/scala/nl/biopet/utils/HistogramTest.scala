@@ -67,7 +67,10 @@ class HistogramTest extends TestNGSuite with Matchers {
     c1.writeHistogramToTsv(tsvFile)
 
     val reader = Source.fromFile(tsvFile)
-    reader.getLines().toList shouldBe List("value\tcount", "1\t1", "2\t2", "3\t3")
+    reader.getLines().toList shouldBe List("value\tcount",
+                                           "1\t1",
+                                           "2\t2",
+                                           "3\t3")
     reader.close()
   }
 
@@ -75,7 +78,11 @@ class HistogramTest extends TestNGSuite with Matchers {
   def testAggregateStats(): Unit = {
     val data: Map[Int, Long] = Map(1 -> 1, 2 -> 2, 3 -> 3)
     val c1 = new Histogram[Int](data)
-    c1.aggregateStats shouldBe Map("modal" -> 3, "mean" -> 2.3333333333333335, "min" -> 1, "max" -> 3, "median" -> 1)
+    c1.aggregateStats shouldBe Map("modal" -> 3,
+                                   "mean" -> 2.3333333333333335,
+                                   "min" -> 1,
+                                   "max" -> 3,
+                                   "median" -> 1)
   }
 
   @Test
