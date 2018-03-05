@@ -21,4 +21,4 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.8"
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.17"
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25"
 
-libraryDependencies += "com.github.biopet" %% "test-utils" % "0.3"
+libraryDependencies += "com.github.biopet" %% "test-utils" % "0.3" % Test
