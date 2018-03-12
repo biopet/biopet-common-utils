@@ -51,6 +51,11 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
     counts += value -> (counts.getOrElse(value, 0L) + 1)
   }
 
+  /** With this a value can be added to the histogram */
+  def addMulti(value: T, number: Long): Unit = {
+    counts += value -> (counts.getOrElse(value, 0L) + number)
+  }
+
   /** Write histogram to a tsv/count file */
   def writeHistogramToTsv(file: File): Unit = {
     val writer = new PrintWriter(file)
