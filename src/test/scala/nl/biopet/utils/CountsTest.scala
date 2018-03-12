@@ -86,6 +86,16 @@ class CountsTest extends TestNGSuite with Matchers {
   }
 
   @Test
+  def testTotal(): Unit = {
+    val c1 = new Counts[Int]()
+    c1.total shouldBe 0L
+    c1.add(4)
+    c1.total shouldBe 1L
+    c1.addMulti(2, 4)
+    c1.total shouldBe 5L
+  }
+
+  @Test
   def testAddMulti(): Unit = {
     val c1 = new Counts[Int]()
     c1.add(4)
