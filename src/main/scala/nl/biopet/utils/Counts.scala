@@ -40,7 +40,7 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   def get(key: T): Option[Long] = counts.get(key)
 
   /** This will add an other histogram to `this` */
-  def +=(other: Counts[T]): Counts[T] = {
+  def +=(other: Counts[T]): this.type = {
     other.counts.foreach(x =>
       this.counts += x._1 -> (this.counts.getOrElse(x._1, 0L) + x._2))
     this
