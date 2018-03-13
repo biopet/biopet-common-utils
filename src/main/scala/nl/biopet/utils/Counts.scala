@@ -23,6 +23,8 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
+import play.api.libs.json._
+
 import scala.collection.mutable
 
 /**
@@ -93,6 +95,10 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   def total: Long = {
     counts.values.sum
   }
+
+  def toJson: JsValue = {
+    conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
+  }
 }
 
 object Counts {
@@ -121,5 +127,15 @@ object Counts {
           .mkString(value + "\t", "\t", ""))
     }
     writer.close()
+  }
+
+  private case class Schema(map: Map[String, Long])
+
+  def mapFromJson(json: JsValue): Map[String, Long] = {
+    implicit val read: Reads[Schema] = Json.reads[Schema]
+    Json.reads[Schema].reads(json) match {
+      case x: JsSuccess[Schema] => x.value.map
+      case e: JsError           => throw new IllegalStateException(e.toString)
+    }
   }
 }
