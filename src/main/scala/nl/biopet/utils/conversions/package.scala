@@ -21,13 +21,14 @@
 
 package nl.biopet.utils
 
-import java.io.{File, PrintWriter}
+import java.io.{File, FileInputStream, PrintWriter}
 import java.util
 
 import org.yaml.snakeyaml.Yaml
 import play.api.libs.json._
 
 import scala.collection.JavaConversions._
+import scala.io.Source
 
 package object conversions {
 
@@ -58,6 +59,13 @@ package object conversions {
         }
       }
     }).toMap
+  }
+
+  def fileToJson(file: File): JsValue = {
+    val inputstream = new FileInputStream(file)
+    val json = Json.parse(new FileInputStream(file))
+    inputstream.close()
+    json
   }
 
   /** Convert Any to Map[String, Any] */
