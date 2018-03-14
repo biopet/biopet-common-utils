@@ -198,6 +198,7 @@ class ConversionsTest extends BiopetTest {
 
   @Test
   def testFileToJson(): Unit = {
-    fileToJson(resourceFile("/test.json")) shouldBe JsObject(Map("key" -> JsString("value")))
+    fileToJson(resourceFile("/test.json")) shouldBe JsObject(
+      Map("key" -> JsString("value")))
   }
 }
