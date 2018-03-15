@@ -23,6 +23,8 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
+import play.api.libs.json._
+
 import scala.collection.mutable
 
 /**
@@ -40,7 +42,7 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   def get(key: T): Option[Long] = counts.get(key)
 
   /** This will add an other histogram to `this` */
-  def +=(other: Counts[T]): Counts[T] = {
+  def +=(other: Counts[T]): this.type = {
     other.counts.foreach(x =>
       this.counts += x._1 -> (this.counts.getOrElse(x._1, 0L) + x._2))
     this
@@ -49,6 +51,11 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   /** With this a value can be added to the histogram */
   def add(value: T): Unit = {
     counts += value -> (counts.getOrElse(value, 0L) + 1)
+  }
+
+  /** With this multiple values of the same content can be added to the histogram */
+  def addMulti(value: T, number: Long): Unit = {
+    counts += value -> (counts.getOrElse(value, 0L) + number)
   }
 
   /** Write histogram to a tsv/count file */
@@ -83,6 +90,15 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
       } else None
     }).flatten.toMap
   }
+
+  /** Returns total number of observations */
+  def total: Long = {
+    counts.values.sum
+  }
+
+  def toJson: JsValue = {
+    conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
+  }
 }
 
 object Counts {
@@ -111,5 +127,15 @@ object Counts {
           .mkString(value + "\t", "\t", ""))
     }
     writer.close()
+  }
+
+  private case class Schema(map: Map[String, Long])
+
+  def mapFromJson(json: JsValue): Map[String, Long] = {
+    implicit val read: Reads[Schema] = Json.reads[Schema]
+    Json.reads[Schema].reads(json) match {
+      case x: JsSuccess[Schema] => x.value.map
+      case e: JsError           => throw new IllegalStateException(e.toString)
+    }
   }
 }
