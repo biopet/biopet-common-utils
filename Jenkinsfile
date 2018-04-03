@@ -11,7 +11,7 @@ node('local') {
         }
 
         stage('Build & Test') {
-            sh "${tool name: 'sbt 1.0.4', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt -no-colors + clean evicted scalafmt coverage test coverageReport coverageAggregate | tee sbt.log"
+            sh "${tool name: 'sbt 1.0.4', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt -no-colors +clean +evicted +scalafmt +coverage +test +coverageReport +coverageAggregate | tee sbt.log"
             sh 'n=`grep -ce "\\* com.github.biopet" sbt.log || true`; if [ "$n" -ne \"0\" ]; then echo "ERROR: Found conflicting dependencies inside biopet"; exit 1; fi'
             sh "git diff --exit-code || (echo \"ERROR: Git changes detected, please regenerate the readme and run scalafmt with: sbt generateReadme scalafmt\" && exit 1)"
         }
@@ -22,7 +22,7 @@ node('local') {
         }
 
         if (env.BRANCH_NAME == 'develop') stage('Publish') {
-            sh "${tool name: 'sbt 1.0.4', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt -no-colors  + publish"
+            sh "${tool name: 'sbt 1.0.4', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin/sbt -no-colors  +publish"
         }
 
         if (currentBuild.result == null || "SUCCESS" == currentBuild.result) {
