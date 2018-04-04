@@ -166,8 +166,8 @@ class ConversionsTest extends BiopetTest {
     val map = Map("key" -> "value", "key2" -> Map("bla" -> 4))
     mapToYamlFile(map, outputFile)
     yamlFileToMap(outputFile) shouldEqual (map)
-
   }
+
   @Test
   def testScalaListToJavaObjectArrayList(): Unit = {
     scalaListToJavaObjectArrayList(List()) shouldBe new util.ArrayList[Object]()
