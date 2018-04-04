@@ -178,20 +178,22 @@ class IoUtilsTest extends BiopetTest {
       "dir2" + File.separator + "test1.txt",
       "dir2" + File.separator + "test2.txt"
     )
-    val allFiles: Seq[File] = relativePaths.map(file =>
-      createTempTestFile(new File(tempDir, file)))
+    val allFiles: Seq[File] =
+      relativePaths.map(file => createTempTestFile(new File(tempDir, file)))
 
-    findFile(tempDir,recursive=true).toSet shouldBe allFiles.toSet
-    findFile(tempDir).toSet should not be allFiles.toSet
+    listDirectory(tempDir, recursive = true).toSet shouldBe allFiles.toSet
+    listDirectory(tempDir).toSet should not be allFiles.toSet
     val twoFiles = List("test2.txt",
-      "dir1" + File.separator + "test2.txt",
-      "dir2" + File.separator + "test2.txt"
-    ).map(file => new File(tempDir, file))
-    findFile(tempDir, Some(new Regex(".*2\\.txt$")),recursive = true).toSet shouldBe twoFiles.toSet
-    findFile(tempDir, Some(new Regex(".*2\\.txt$"))).toSet shouldBe Set(new File(tempDir, "test2.txt"))
-    findFile(tempDir, Some(new Regex("^dir"))).toSet shouldBe Set(new File(tempDir,"dir1"), new File(tempDir,"dir2"))
-    findFile(tempDir, Some(new Regex("^dir")), recursive = true).toSet shouldBe Set()
-
+                        "dir1" + File.separator + "test2.txt",
+                        "dir2" + File.separator + "test2.txt").map(file =>
+      new File(tempDir, file))
+    listDirectory(tempDir, Some(new Regex(".*2\\.txt$")), recursive = true).toSet shouldBe twoFiles.toSet
+    listDirectory(tempDir, Some(new Regex(".*2\\.txt$"))).toSet shouldBe Set(
+      new File(tempDir, "test2.txt"))
+    listDirectory(tempDir, Some(new Regex("^dir"))).toSet shouldBe Set(
+      new File(tempDir, "dir1"),
+      new File(tempDir, "dir2"))
+    listDirectory(tempDir, Some(new Regex("^dir")), recursive = true).toSet shouldBe Set()
 
   }
 }

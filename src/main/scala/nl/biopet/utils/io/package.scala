@@ -54,32 +54,24 @@ package object io {
     *         (and subdirectories if recursive)
     *         (that match the regex if specified)
     */
-  def findFile(dir: File,
-               regex: Option[Regex] = None,
-               recursive: Boolean = false): Seq[File] = {
+  def listDirectory(dir: File,
+                    regex: Option[Regex] = None,
+                    recursive: Boolean = false): Seq[File] = {
     require(dir.isDirectory)
     val files = dir.listFiles()
-    val matchedFiles: Seq[File] = files.flatMap(file => {
-      // in recursive mode the subdirectory is searched.
-      // in non recursive mode it is treated as a file.
-      if (file.isDirectory && recursive) {
-        findFile(file, regex, recursive)
-      } else {
-        if (regex.isDefined) {
-          // check if regex has a match in the filename. If so it is matched.
-          val matched: Boolean =
-            regex
-              .getOrElse(new Regex("*"))
-              .findFirstMatchIn(file.getName)
-              .isDefined
-          // Return the file if matched. Else return nothing.
-          if (matched) { Seq(file) } else Seq()
-        }
-        // If no regex is defined then the file is returned.
-        else Seq(file)
+
+    files.flatMap { file =>
+      regex match {
+        case _ if file.isDirectory && recursive =>
+          listDirectory(file, regex, recursive)
+        case Some(r) =>
+          r.findFirstIn(file.getName) match {
+            case Some(_) => Some(file)
+            case _       => None
+          }
+        case _ => Some(file)
       }
-    })
-    matchedFiles
+    }
   }
 
   def copyStreamToFile(in: InputStream,
