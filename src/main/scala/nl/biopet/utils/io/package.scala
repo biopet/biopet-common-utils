@@ -24,10 +24,19 @@ package nl.biopet.utils
 import java.io._
 
 import scala.io.Source
+import org.apache.commons.io.IOUtils
+import java.net.URL
+import scala.language.postfixOps
+import com.roundeights.hasher.Implicits._
 
 package object io {
-  def copyFile(in: File, out: File, createDirs: Boolean = false): Unit = {
+  def copyFile(in: File, out: File, createDirs: Boolean = false, permissions: Boolean = true): Unit = {
     copyStreamToFile(new FileInputStream(in), out, createDirs)
+    if (permissions) {
+      out.setReadable(in.canRead)
+      out.setWritable(in.canWrite)
+      out.setExecutable(in.canExecute)
+    }
   }
 
   def copyStreamToFile(in: InputStream,
@@ -36,7 +45,7 @@ package object io {
     if (createDirs) out.getParentFile.mkdirs()
     val os = new FileOutputStream(out)
 
-    org.apache.commons.io.IOUtils.copy(in, os)
+    IOUtils.copy(in, os)
     os.close()
     in.close()
   }
@@ -51,16 +60,26 @@ package object io {
     copyStreamToFile(source, outputFile, createDirs = true)
   }
 
-  def copyDir(inputDir: File, externalDir: File): Unit = {
+  /**
+    * Copies contents of a directory to a new directory.
+    * @param inputDir
+    * @param externalDir
+    */
+  def copyDir(inputDir: File, externalDir: File, permissions: Boolean = true): Unit = {
     require(inputDir.isDirectory)
-    externalDir.mkdirs()
+    if (externalDir.exists()) {
+      if (!externalDir.isDirectory) {
+        throw new IOException(s"${externalDir.getAbsolutePath} is a file, not a directory")
+      }
+    }
+    else externalDir.mkdirs()
     for (srcFile <- inputDir.listFiles) {
       if (srcFile.isDirectory)
         copyDir(new File(inputDir, srcFile.getName),
                 new File(externalDir, srcFile.getName))
       else {
         val newFile = new File(externalDir, srcFile.getName)
-        copyFile(srcFile, newFile)
+        copyFile(srcFile, newFile, permissions = permissions)
       }
     }
   }
@@ -111,5 +130,18 @@ package object io {
     val writer = new PrintWriter(outputFile)
     lines.foreach(writer.println)
     writer.close()
+  }
+
+  /**
+    * Calculates the sha256sum of a file that is downloaded from the URL
+    * @param url
+    * @return the hex of the sha256sum.
+    */
+  def getSha256SumFromDownload(url: URL): Option[String] = {
+    try {
+      Some(url.openStream().sha256.hex)
+    } catch {
+      case e: java.io.FileNotFoundException => None
+    }
   }
 }

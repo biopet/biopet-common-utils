@@ -22,5 +22,5 @@ libraryDependencies += "commons-io" % "commons-io" % "2.6"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.8"
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.17"
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25"
-
+libraryDependencies += "com.roundeights" %% "hasher" % "1.2.0"
 libraryDependencies += "com.github.biopet" %% "test-utils" % "0.4-SNAPSHOT" % Test changing ()
