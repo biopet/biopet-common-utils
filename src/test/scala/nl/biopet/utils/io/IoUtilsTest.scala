@@ -133,4 +133,13 @@ class IoUtilsTest extends BiopetTest {
 
     getLinesFromFile(file) shouldBe List("test")
   }
+
+  @Test
+  def testWriteStringToFile(): Unit = {
+    val string = "testing testerdetest test"
+    val file = File.createTempFile("stringtofile.",".txt")
+    file.deleteOnExit()
+    stringToFile(string,file)
+    Source.fromFile(file).mkString shouldEqual(string + "\n")
+  }
 }

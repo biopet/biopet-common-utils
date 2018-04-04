@@ -65,6 +65,17 @@ package object io {
     }
   }
 
+  /**
+    * Writes a string to a file
+    * @param string the string
+    * @param file the file
+    */
+  def stringToFile(string: String, file: File): Unit = {
+    val writer = new PrintWriter(file)
+    writer.println(string)
+    writer.close()
+  }
+
   /** Possible compression extensions to trim from input files. */
   val zipExtensions = Set(".gz", ".gzip", ".bzip2", ".bz", ".xz", ".zip")
 
