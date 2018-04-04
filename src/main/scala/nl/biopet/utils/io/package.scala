@@ -30,7 +30,10 @@ import scala.language.postfixOps
 import com.roundeights.hasher.Implicits._
 
 package object io {
-  def copyFile(in: File, out: File, createDirs: Boolean = false, permissions: Boolean = true): Unit = {
+  def copyFile(in: File,
+               out: File,
+               createDirs: Boolean = false,
+               permissions: Boolean = true): Unit = {
     copyStreamToFile(new FileInputStream(in), out, createDirs)
     if (permissions) {
       out.setReadable(in.canRead)
@@ -62,17 +65,19 @@ package object io {
 
   /**
     * Copies contents of a directory to a new directory.
-    * @param inputDir
-    * @param externalDir
+    * @param inputDir the input directory
+    * @param externalDir the output directory
     */
-  def copyDir(inputDir: File, externalDir: File, permissions: Boolean = true): Unit = {
+  def copyDir(inputDir: File,
+              externalDir: File,
+              permissions: Boolean = true): Unit = {
     require(inputDir.isDirectory)
     if (externalDir.exists()) {
       if (!externalDir.isDirectory) {
-        throw new IOException(s"${externalDir.getAbsolutePath} is a file, not a directory")
+        throw new IOException(
+          s"${externalDir.getAbsolutePath} is a file, not a directory")
       }
-    }
-    else externalDir.mkdirs()
+    } else externalDir.mkdirs()
     for (srcFile <- inputDir.listFiles) {
       if (srcFile.isDirectory)
         copyDir(new File(inputDir, srcFile.getName),
@@ -134,7 +139,7 @@ package object io {
 
   /**
     * Calculates the sha256sum of a file that is downloaded from the URL
-    * @param url
+    * @param url the URL
     * @return the hex of the sha256sum.
     */
   def getSha256SumFromDownload(url: URL): Option[String] = {

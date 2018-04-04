@@ -21,7 +21,7 @@
 
 package nl.biopet.utils.io
 
-import java.io.{File, FileNotFoundException, PrintWriter,IOException}
+import java.io.{File, FileNotFoundException, PrintWriter, IOException}
 import java.net.URL
 import java.nio.file.Files
 
@@ -107,10 +107,10 @@ class IoUtilsTest extends BiopetTest {
     tempDir2.createNewFile()
     intercept[IOException] {
       copyDir(tempDir1, tempDir2)
-    }.getMessage() shouldBe s"${tempDir2.getAbsolutePath} is a file, not a directory"
+    }.getMessage shouldBe s"${tempDir2.getAbsolutePath} is a file, not a directory"
     tempDir2.delete()
     tempDir2.mkdirs()
-    copyDir(tempDir1,tempDir2)
+    copyDir(tempDir1, tempDir2)
     relativePaths.foreach { x =>
       val file = new File(tempDir2, x)
       file should exist
@@ -120,8 +120,6 @@ class IoUtilsTest extends BiopetTest {
       reader.close()
     }
   }
-
-
   @Test
   def testGetUncompressedFileName(): Unit = {
     getUncompressedFileName(new File("test.gz")) shouldBe "test"
@@ -149,17 +147,18 @@ class IoUtilsTest extends BiopetTest {
   @Test
   def testWriteStringToFile(): Unit = {
     val string = "testing testerdetest test"
-    val file = File.createTempFile("stringtofile.",".txt")
+    val file = File.createTempFile("stringtofile.", ".txt")
     file.deleteOnExit()
-    stringToFile(string,file)
-    Source.fromFile(file).mkString shouldEqual(string + "\n")
+    stringToFile(string, file)
+    Source.fromFile(file).mkString shouldEqual (string + "\n")
   }
 
   @Test
   def testSha256Sum(): Unit = {
     // Taken the README from Biopet 0.9.0. Small, link should be stable
     val downloadLink: URL =
-      new URL("https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.md")
+      new URL(
+        "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.md")
     getSha256SumFromDownload(downloadLink) shouldBe Some(
       "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901")
     getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense")) shouldBe None
