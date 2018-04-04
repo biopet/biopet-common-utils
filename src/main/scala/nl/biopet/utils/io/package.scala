@@ -73,7 +73,7 @@ package object io {
               .findFirstMatchIn(file.getName)
               .isDefined
           // Return the file if matched. Else return nothing.
-          if (matched) { Seq(File) } else Seq()
+          if (matched) { Seq(file) } else Seq()
         }
         // If no regex is defined then the file is returned.
         else Seq(file)

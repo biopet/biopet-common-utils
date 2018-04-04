@@ -25,6 +25,7 @@ import java.io.{File, FileNotFoundException, PrintWriter, IOException}
 import java.net.URL
 import java.nio.file.Files
 
+import scala.util.matching.Regex
 import nl.biopet.test.BiopetTest
 import org.testng.annotations.Test
 
@@ -120,6 +121,7 @@ class IoUtilsTest extends BiopetTest {
       reader.close()
     }
   }
+
   @Test
   def testGetUncompressedFileName(): Unit = {
     getUncompressedFileName(new File("test.gz")) shouldBe "test"
@@ -162,5 +164,34 @@ class IoUtilsTest extends BiopetTest {
     getSha256SumFromDownload(downloadLink) shouldBe Some(
       "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901")
     getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense")) shouldBe None
+  }
+
+  @Test
+  def testFindFile(): Unit = {
+    val tempDir = Files.createTempDirectory("test").toFile
+    tempDir.deleteOnExit()
+    val relativePaths: List[String] = List(
+      "test1.txt",
+      "test2.txt",
+      "dir1" + File.separator + "test1.txt",
+      "dir1" + File.separator + "test2.txt",
+      "dir2" + File.separator + "test1.txt",
+      "dir2" + File.separator + "test2.txt"
+    )
+    val allFiles: Seq[File] = relativePaths.map(file =>
+      createTempTestFile(new File(tempDir, file)))
+
+    findFile(tempDir,recursive=true).toSet shouldBe allFiles.toSet
+    findFile(tempDir).toSet should not be allFiles.toSet
+    val twoFiles = List("test2.txt",
+      "dir1" + File.separator + "test2.txt",
+      "dir2" + File.separator + "test2.txt"
+    ).map(file => new File(tempDir, file))
+    findFile(tempDir, Some(new Regex(".*2\\.txt$")),recursive = true).toSet shouldBe twoFiles.toSet
+    findFile(tempDir, Some(new Regex(".*2\\.txt$"))).toSet shouldBe Set(new File(tempDir, "test2.txt"))
+    findFile(tempDir, Some(new Regex("^dir"))).toSet shouldBe Set(new File(tempDir,"dir1"), new File(tempDir,"dir2"))
+    findFile(tempDir, Some(new Regex("^dir")), recursive = true).toSet shouldBe Set()
+
+
   }
 }
