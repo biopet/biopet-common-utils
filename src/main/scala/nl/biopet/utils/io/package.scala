@@ -74,6 +74,12 @@ package object io {
     }
   }
 
+  /**
+    * Writes a stream to a file.
+    * @param in The input stream
+    * @param out The output file
+    * @param createDirs Whether non existing directories should be created
+    */
   def copyStreamToFile(in: InputStream,
                        out: File,
                        createDirs: Boolean = false): Unit = {

@@ -8,10 +8,16 @@ startYear := Some(2014)
 
 biopetIsTool := false
 
-developers += Developer(id = "ffinfo",
-                        name = "Peter van 't Hof",
-                        email = "pjrvanthof@gmail.com",
-                        url = url("https://github.com/ffinfo"))
+developers ++= List(
+  Developer(id = "ffinfo",
+            name = "Peter van 't Hof",
+            email = "pjrvanthof@gmail.com",
+            url = url("https://github.com/ffinfo")),
+  Developer(id = "rhpvorderman",
+            name = "Ruben Vorderman",
+            email = "r.h.p.vorderman@lumc.nl",
+            url = url("https://github.com/rhpvorderman"))
+)
 
 crossScalaVersions := Seq("2.11.12", "2.12.5")
 

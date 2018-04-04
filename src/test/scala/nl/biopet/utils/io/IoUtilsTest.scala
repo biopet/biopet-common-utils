@@ -167,7 +167,7 @@ class IoUtilsTest extends BiopetTest {
   }
 
   @Test
-  def testFindFile(): Unit = {
+  def testListDirectory(): Unit = {
     val tempDir = Files.createTempDirectory("test").toFile
     tempDir.deleteOnExit()
     val relativePaths: List[String] = List(

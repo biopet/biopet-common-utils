@@ -61,6 +61,11 @@ package object conversions {
     }).toMap
   }
 
+  /**
+    * Converts a file to a json value
+    * @param file input file
+    * @return a JsValue from play framework.
+    */
   def fileToJson(file: File): JsValue = {
     val inputstream = new FileInputStream(file)
     val json = Json.parse(new FileInputStream(file))
@@ -95,9 +100,19 @@ package object conversions {
 
   lazy val yaml = new Yaml()
 
+  /**
+    * Converts a Map[String,Any] to a human-readable YAML
+    * @param map the map
+    * @return a string in yaml format
+    */
   def mapToYaml(map: Map[String, Any]): String =
     yaml.dumpAsMap(yaml.load(Json.stringify(mapToJson(map))))
 
+  /**
+    * Writes a map to a yaml file.
+    * @param map map
+    * @param outputFile yaml file
+    */
   def mapToYamlFile(map: Map[String, Any], outputFile: File): Unit = {
     val writer = new PrintWriter(outputFile)
     writer.println(mapToYaml(map))
