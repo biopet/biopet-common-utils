@@ -96,7 +96,7 @@ package object conversions {
   lazy val yaml = new Yaml()
 
   def mapToYaml(map: Map[String, Any]): String =
-    yaml.dump(yaml.load(Json.stringify(mapToJson(map))))
+    yaml.dumpAsMap(yaml.load(Json.stringify(mapToJson(map))))
 
   def mapToYamlFile(map: Map[String, Any], outputFile: File): Unit = {
     val writer = new PrintWriter(outputFile)
