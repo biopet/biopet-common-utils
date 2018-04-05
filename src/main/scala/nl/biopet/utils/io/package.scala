@@ -31,6 +31,15 @@ import scala.language.postfixOps
 import com.roundeights.hasher.Implicits._
 
 package object io {
+
+  /**
+    * Copies a file to a destination
+    * @param in the input file
+    * @param out the output file
+    * @param createDirs whether parent directories for the output
+    *                   file should be automatically created
+    * @param permissions whether the permissions of the file should be copied
+    */
   def copyFile(in: File,
                out: File,
                createDirs: Boolean = false,
@@ -184,7 +193,9 @@ package object io {
     try {
       Some(url.openStream().sha256.hex)
     } catch {
-      case e: java.io.FileNotFoundException => None
+      case e: java.io.FileNotFoundException =>
+        throw new java.io.FileNotFoundException(
+          s"File not found. Could not generate sha256 on url: ${url.toString}")
     }
   }
 }
