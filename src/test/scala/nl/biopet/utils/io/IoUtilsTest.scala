@@ -21,14 +21,15 @@
 
 package nl.biopet.utils.io
 
-import java.io.{File, FileNotFoundException, PrintWriter, IOException}
+import java.io.{File, FileNotFoundException, IOException, PrintWriter}
 import java.net.URL
 import java.nio.file.Files
 
 import scala.util.matching.Regex
 import nl.biopet.test.BiopetTest
-import org.testng.annotations.Test
+import org.testng.annotations.{AfterClass, Test}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 /**
@@ -36,6 +37,7 @@ import scala.io.Source
   */
 class IoUtilsTest extends BiopetTest {
 
+  val tempDirs: ArrayBuffer[File] = new ArrayBuffer()
   def createTempTestFile(file: File): File = {
     file.getParentFile.mkdirs()
     val writer = new PrintWriter(file)
@@ -43,6 +45,12 @@ class IoUtilsTest extends BiopetTest {
     writer.close()
     file.deleteOnExit()
     file
+  }
+  @AfterClass
+  def deleteTempDirs(): Unit = {
+    tempDirs.foreach { dir =>
+      deleteDirectory(dir)
+    }
   }
 
   @Test
@@ -72,7 +80,7 @@ class IoUtilsTest extends BiopetTest {
     val temp1 = File.createTempFile("test.", ".txt")
     val tempDir =
       new File(Files.createTempDirectory("test").toFile, "non-exist")
-    tempDir.deleteOnExit()
+    tempDirs.append(tempDir)
     tempDir shouldNot exist
     val temp2 = new File(tempDir, "test.txt")
     createTempTestFile(temp1)
@@ -88,9 +96,9 @@ class IoUtilsTest extends BiopetTest {
   @Test
   def testCopyDir(): Unit = {
     val tempDir1 = Files.createTempDirectory("test").toFile
-    tempDir1.deleteOnExit()
+    tempDirs.append(tempDir1)
     val tempDir2 = Files.createTempDirectory("test").toFile
-    tempDir2.deleteOnExit()
+    tempDirs.append(tempDir2)
     val relativePaths: List[String] = List(
       "test1.txt",
       "test2.txt",
@@ -163,13 +171,17 @@ class IoUtilsTest extends BiopetTest {
         "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.md")
     getSha256SumFromDownload(downloadLink) shouldBe Some(
       "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901")
-    getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense")) shouldBe None
+    intercept[java.io.FileNotFoundException] {
+      getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense"))
+    }.getMessage shouldBe
+      "File not found. Could not generate sha256 on url: " +
+        "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.mdnonsense"
   }
 
   @Test
   def testListDirectory(): Unit = {
     val tempDir = Files.createTempDirectory("test").toFile
-    tempDir.deleteOnExit()
+    tempDirs.append(tempDir)
     val relativePaths: List[String] = List(
       "test1.txt",
       "test2.txt",
