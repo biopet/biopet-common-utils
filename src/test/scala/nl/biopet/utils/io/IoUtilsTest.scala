@@ -24,7 +24,7 @@ package nl.biopet.utils.io
 import java.io.{File, FileNotFoundException, IOException, PrintWriter}
 import java.net.URL
 import java.nio.file.Files
-
+import org.apache.commons.io.FileUtils
 import scala.util.matching.Regex
 import nl.biopet.test.BiopetTest
 import org.testng.annotations.{AfterClass, Test}
@@ -49,7 +49,7 @@ class IoUtilsTest extends BiopetTest {
   @AfterClass
   def deleteTempDirs(): Unit = {
     tempDirs.foreach { dir =>
-      deleteDirectory(dir)
+      FileUtils.deleteDirectory(dir)
     }
   }
 
