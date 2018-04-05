@@ -198,16 +198,32 @@ package object io {
 
   /**
     * Calculates the sha256sum of a file that is downloaded from the URL
+    * @throws FileNotFoundException
     * @param url the URL
     * @return the hex of the sha256sum.
     */
-  def getSha256SumFromDownload(url: URL): Option[String] = {
+  def getSha256SumFromDownload(url: URL): String = {
     try {
-      Some(url.openStream().sha256.hex)
+      url.openStream().sha256.hex
     } catch {
       case e: java.io.FileNotFoundException =>
         throw new java.io.FileNotFoundException(
           s"File not found. Could not generate sha256 on url: ${url.toString}")
+    }
+  }
+
+  /**
+    * Calculates the sha256sum of a file that is downloaded from the URL
+    * @param url the URL
+    * @return the hex of the sha256sum.
+    */
+  def getSha256SumFromDownloadOption(url: URL): Option[String] = {
+    try {
+      Some(getSha256SumFromDownload(url))
+    } catch {
+      case e: java.io.FileNotFoundException =>
+        Logging.logger.warn(e.getMessage)
+        None
     }
   }
 }
