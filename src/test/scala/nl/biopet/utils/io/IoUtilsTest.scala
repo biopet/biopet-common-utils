@@ -21,12 +21,15 @@
 
 package nl.biopet.utils.io
 
-import java.io.{File, FileNotFoundException, PrintWriter}
+import java.io.{File, FileNotFoundException, IOException, PrintWriter}
+import java.net.URL
 import java.nio.file.Files
-
+import org.apache.commons.io.FileUtils
+import scala.util.matching.Regex
 import nl.biopet.test.BiopetTest
-import org.testng.annotations.Test
+import org.testng.annotations.{AfterClass, Test}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 /**
@@ -34,12 +37,20 @@ import scala.io.Source
   */
 class IoUtilsTest extends BiopetTest {
 
-  def createTempTestFile(file: File): Unit = {
+  val tempDirs: ArrayBuffer[File] = new ArrayBuffer()
+  def createTempTestFile(file: File): File = {
     file.getParentFile.mkdirs()
     val writer = new PrintWriter(file)
     writer.println("test")
     writer.close()
     file.deleteOnExit()
+    file
+  }
+  @AfterClass
+  def deleteTempDirs(): Unit = {
+    tempDirs.foreach { dir =>
+      FileUtils.deleteDirectory(dir)
+    }
   }
 
   @Test
@@ -69,7 +80,7 @@ class IoUtilsTest extends BiopetTest {
     val temp1 = File.createTempFile("test.", ".txt")
     val tempDir =
       new File(Files.createTempDirectory("test").toFile, "non-exist")
-    tempDir.deleteOnExit()
+    tempDirs.append(tempDir)
     tempDir shouldNot exist
     val temp2 = new File(tempDir, "test.txt")
     createTempTestFile(temp1)
@@ -85,9 +96,9 @@ class IoUtilsTest extends BiopetTest {
   @Test
   def testCopyDir(): Unit = {
     val tempDir1 = Files.createTempDirectory("test").toFile
-    tempDir1.deleteOnExit()
+    tempDirs.append(tempDir1)
     val tempDir2 = Files.createTempDirectory("test").toFile
-    tempDir2.deleteOnExit()
+    tempDirs.append(tempDir2)
     val relativePaths: List[String] = List(
       "test1.txt",
       "test2.txt",
@@ -97,13 +108,22 @@ class IoUtilsTest extends BiopetTest {
       "dir2" + File.separator + "test2.txt"
     )
     relativePaths.foreach { x =>
-      createTempTestFile(new File(tempDir1, x))
+      val file = createTempTestFile(new File(tempDir1, x))
+      file.setExecutable(true)
       new File(tempDir2, x) shouldNot exist
     }
+    tempDir2.delete()
+    tempDir2.createNewFile()
+    intercept[IOException] {
+      copyDir(tempDir1, tempDir2)
+    }.getMessage shouldBe s"${tempDir2.getAbsolutePath} is a file, not a directory"
+    tempDir2.delete()
+    tempDir2.mkdirs()
     copyDir(tempDir1, tempDir2)
     relativePaths.foreach { x =>
       val file = new File(tempDir2, x)
       file should exist
+      file.canExecute shouldEqual true
       val reader = Source.fromFile(file)
       reader.getLines().toList shouldBe List("test")
       reader.close()
@@ -132,5 +152,62 @@ class IoUtilsTest extends BiopetTest {
     writeLinesToFile(file, List("test"))
 
     getLinesFromFile(file) shouldBe List("test")
+  }
+
+  @Test
+  def testWriteStringToFile(): Unit = {
+    val string = "testing testerdetest test"
+    val file = File.createTempFile("stringtofile.", ".txt")
+    file.deleteOnExit()
+    stringToFile(string, file)
+    Source.fromFile(file).mkString shouldEqual (string + "\n")
+  }
+
+  @Test
+  def testSha256Sum(): Unit = {
+    // Taken the README from Biopet 0.9.0. Small, link should be stable
+    val downloadLink: URL =
+      new URL(
+        "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.md")
+    getSha256SumFromDownloadOption(downloadLink) shouldBe Some(
+      "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901")
+    getSha256SumFromDownload(downloadLink) shouldBe "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901"
+    intercept[java.io.FileNotFoundException] {
+      getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense"))
+    }.getMessage shouldBe
+      "File not found. Could not generate sha256 on url: " +
+        "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.mdnonsense"
+    getSha256SumFromDownloadOption(new URL(downloadLink.toString + "nonsense")) shouldBe None
+  }
+
+  @Test
+  def testListDirectory(): Unit = {
+    val tempDir = Files.createTempDirectory("test").toFile
+    tempDirs.append(tempDir)
+    val relativePaths: List[String] = List(
+      "test1.txt",
+      "test2.txt",
+      "dir1" + File.separator + "test1.txt",
+      "dir1" + File.separator + "test2.txt",
+      "dir2" + File.separator + "test1.txt",
+      "dir2" + File.separator + "test2.txt"
+    )
+    val allFiles: Seq[File] =
+      relativePaths.map(file => createTempTestFile(new File(tempDir, file)))
+
+    listDirectory(tempDir, recursive = true).toSet shouldBe allFiles.toSet
+    listDirectory(tempDir).toSet should not be allFiles.toSet
+    val twoFiles = List("test2.txt",
+                        "dir1" + File.separator + "test2.txt",
+                        "dir2" + File.separator + "test2.txt").map(file =>
+      new File(tempDir, file))
+    listDirectory(tempDir, Some(new Regex(".*2\\.txt$")), recursive = true).toSet shouldBe twoFiles.toSet
+    listDirectory(tempDir, Some(new Regex(".*2\\.txt$"))).toSet shouldBe Set(
+      new File(tempDir, "test2.txt"))
+    listDirectory(tempDir, Some(new Regex("^dir"))).toSet shouldBe Set(
+      new File(tempDir, "dir1"),
+      new File(tempDir, "dir2"))
+    listDirectory(tempDir, Some(new Regex("^dir")), recursive = true).toSet shouldBe Set()
+
   }
 }

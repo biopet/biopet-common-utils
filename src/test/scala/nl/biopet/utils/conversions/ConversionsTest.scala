@@ -151,10 +151,21 @@ class ConversionsTest extends BiopetTest {
     outputFile.deleteOnExit()
     mapToYamlFile(Map("key" -> "value", "key2" -> Map("bla" -> 4)), outputFile)
 
-    Source.fromFile(outputFile).getLines().toList shouldBe List(
-      "key: value",
-      "key2: {bla: 4}",
-      "")
+    Source.fromFile(outputFile).getLines().toList shouldBe List("key: value",
+                                                                "key2:",
+                                                                "" +
+                                                                  "  bla: 4",
+                                                                "")
+  }
+
+  @Test
+  def testMapToYamlToFileToYamlToMap(): Unit = {
+    // This test makes sure the yaml conversion always works.
+    val outputFile = File.createTempFile("test.", ".yaml")
+    outputFile.deleteOnExit()
+    val map = Map("key" -> "value", "key2" -> Map("bla" -> 4))
+    mapToYamlFile(map, outputFile)
+    yamlFileToMap(outputFile) shouldEqual (map)
   }
 
   @Test

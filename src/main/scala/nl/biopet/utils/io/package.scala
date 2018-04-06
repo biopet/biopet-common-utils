@@ -24,19 +24,78 @@ package nl.biopet.utils
 import java.io._
 
 import scala.io.Source
+import org.apache.commons.io.IOUtils
+import scala.util.matching.Regex
+import java.net.URL
+import scala.language.postfixOps
+import com.roundeights.hasher.Implicits._
 
 package object io {
-  def copyFile(in: File, out: File, createDirs: Boolean = false): Unit = {
+
+  /**
+    * Copies a file to a destination
+    * @param in the input file
+    * @param out the output file
+    * @param createDirs whether parent directories for the output
+    *                   file should be automatically created
+    * @param permissions whether the permissions of the file should be copied
+    */
+  def copyFile(in: File,
+               out: File,
+               createDirs: Boolean = false,
+               permissions: Boolean = true): Unit = {
     copyStreamToFile(new FileInputStream(in), out, createDirs)
+    if (permissions) {
+      out.setReadable(in.canRead)
+      out.setWritable(in.canWrite)
+      out.setExecutable(in.canExecute)
+    }
   }
 
+  /**
+    * Finds a file in a specified directory.
+    * @param dir directory to be searched
+    * @param regex optional regex. Files matching this regex will be returned.
+    *              If not specified all files are returned.
+    * @param recursive if true also subdirectories are searched.
+    *                  if false subdirectories are treated as files
+    * @return all files in the directory
+    *         (and subdirectories if recursive)
+    *         (that match the regex if specified)
+    */
+  def listDirectory(dir: File,
+                    regex: Option[Regex] = None,
+                    recursive: Boolean = false): Seq[File] = {
+    require(dir.isDirectory)
+    val files = dir.listFiles()
+
+    files.flatMap { file =>
+      regex match {
+        case _ if file.isDirectory && recursive =>
+          listDirectory(file, regex, recursive)
+        case Some(r) =>
+          r.findFirstIn(file.getName) match {
+            case Some(_) => Some(file)
+            case _       => None
+          }
+        case _ => Some(file)
+      }
+    }
+  }
+
+  /**
+    * Writes a stream to a file.
+    * @param in The input stream
+    * @param out The output file
+    * @param createDirs Whether non existing directories should be created
+    */
   def copyStreamToFile(in: InputStream,
                        out: File,
                        createDirs: Boolean = false): Unit = {
     if (createDirs) out.getParentFile.mkdirs()
     val os = new FileOutputStream(out)
 
-    org.apache.commons.io.IOUtils.copy(in, os)
+    IOUtils.copy(in, os)
     os.close()
     in.close()
   }
@@ -51,18 +110,41 @@ package object io {
     copyStreamToFile(source, outputFile, createDirs = true)
   }
 
-  def copyDir(inputDir: File, externalDir: File): Unit = {
+  /**
+    * Copies contents of a directory to a new directory.
+    * @param inputDir the input directory
+    * @param externalDir the output directory
+    */
+  def copyDir(inputDir: File,
+              externalDir: File,
+              permissions: Boolean = true): Unit = {
     require(inputDir.isDirectory)
-    externalDir.mkdirs()
+    if (externalDir.exists()) {
+      if (!externalDir.isDirectory) {
+        throw new IOException(
+          s"${externalDir.getAbsolutePath} is a file, not a directory")
+      }
+    } else externalDir.mkdirs()
     for (srcFile <- inputDir.listFiles) {
       if (srcFile.isDirectory)
         copyDir(new File(inputDir, srcFile.getName),
                 new File(externalDir, srcFile.getName))
       else {
         val newFile = new File(externalDir, srcFile.getName)
-        copyFile(srcFile, newFile)
+        copyFile(srcFile, newFile, permissions = permissions)
       }
     }
+  }
+
+  /**
+    * Writes a string to a file
+    * @param string the string
+    * @param file the file
+    */
+  def stringToFile(string: String, file: File): Unit = {
+    val writer = new PrintWriter(file)
+    writer.println(string)
+    writer.close()
   }
 
   /** Possible compression extensions to trim from input files. */
@@ -100,5 +182,36 @@ package object io {
     val writer = new PrintWriter(outputFile)
     lines.foreach(writer.println)
     writer.close()
+  }
+
+  /**
+    * Calculates the sha256sum of a file that is downloaded from the URL
+    * @throws FileNotFoundException
+    * @param url the URL
+    * @return the hex of the sha256sum.
+    */
+  def getSha256SumFromDownload(url: URL): String = {
+    try {
+      url.openStream().sha256.hex
+    } catch {
+      case e: java.io.FileNotFoundException =>
+        throw new java.io.FileNotFoundException(
+          s"File not found. Could not generate sha256 on url: ${url.toString}")
+    }
+  }
+
+  /**
+    * Calculates the sha256sum of a file that is downloaded from the URL
+    * @param url the URL
+    * @return the hex of the sha256sum.
+    */
+  def getSha256SumFromDownloadOption(url: URL): Option[String] = {
+    try {
+      Some(getSha256SumFromDownload(url))
+    } catch {
+      case e: java.io.FileNotFoundException =>
+        Logging.logger.warn(e.getMessage)
+        None
+    }
   }
 }
