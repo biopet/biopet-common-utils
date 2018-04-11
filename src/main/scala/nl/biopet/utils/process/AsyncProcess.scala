@@ -101,9 +101,20 @@ trait Sys {
   var maxRunningProcesses: Int = 5
 
   def exec(cmd: String,
-           cwd: Option[File] = None,
-           env: Map[String, String] = Map()): ExecResult =
+           cwd: Option[File],
+           env: Map[String, String]): ExecResult =
     exec(cmd.split(" "), cwd, env)
+
+  def exec(cmd: String): ExecResult =
+    exec(cmd.split(" "))
+
+  def exec(cmd: String,
+           cwd: Option[File]): ExecResult =
+    exec(cmd.split(" "), cwd)
+
+  def exec(cmd: String,
+           env: Map[String, String]): ExecResult =
+    exec(cmd.split(" "), env = env)
 
   /**
     * executes the cmd and blocks until the command exits.
@@ -132,10 +143,24 @@ trait Sys {
   }
 
   def execAsync(cmd: String,
-                cwd: Option[File] = None,
-                env: Map[String, String] = Map())(
+                cwd: Option[File],
+                env: Map[String, String])(
       implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "), cwd, env)(ec)
+
+  def execAsync(cmd: String)(
+    implicit ec: ExecutionContext): AsyncExecResult =
+    execAsync(cmd.split(" "))(ec)
+
+  def execAsync(cmd: String,
+           cwd: Option[File])(
+                 implicit ec: ExecutionContext): AsyncExecResult =
+    execAsync(cmd.split(" "), cwd)(ec)
+
+  def execAsync(cmd: String,
+           env: Map[String, String])(
+                 implicit ec: ExecutionContext): AsyncExecResult =
+    execAsync(cmd.split(" "), env = env)(ec)
 
   /**
     * executes the cmd asynchronous
