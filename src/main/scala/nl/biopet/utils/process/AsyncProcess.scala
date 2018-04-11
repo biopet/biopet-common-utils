@@ -43,8 +43,8 @@ import java.io.File
 import nl.biopet.utils.Logging
 
 import scala.collection.parallel.mutable.ParMap
-import scala.concurrent.duration.Duration
 import scala.concurrent._
+import scala.concurrent.duration.Duration
 import scala.sys.process.{Process, ProcessLogger}
 import scala.util.Try
 
@@ -108,12 +108,10 @@ trait Sys {
   def exec(cmd: String): ExecResult =
     exec(cmd.split(" "))
 
-  def exec(cmd: String,
-           cwd: Option[File]): ExecResult =
+  def exec(cmd: String, cwd: Option[File]): ExecResult =
     exec(cmd.split(" "), cwd)
 
-  def exec(cmd: String,
-           env: Map[String, String]): ExecResult =
+  def exec(cmd: String, env: Map[String, String]): ExecResult =
     exec(cmd.split(" "), env = env)
 
   /**
@@ -142,24 +140,19 @@ trait Sys {
       .get
   }
 
-  def execAsync(cmd: String,
-                cwd: Option[File],
-                env: Map[String, String])(
+  def execAsync(cmd: String, cwd: Option[File], env: Map[String, String])(
       implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "), cwd, env)(ec)
 
-  def execAsync(cmd: String)(
-    implicit ec: ExecutionContext): AsyncExecResult =
+  def execAsync(cmd: String)(implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "))(ec)
 
-  def execAsync(cmd: String,
-           cwd: Option[File])(
-                 implicit ec: ExecutionContext): AsyncExecResult =
+  def execAsync(cmd: String, cwd: Option[File])(
+      implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "), cwd)(ec)
 
-  def execAsync(cmd: String,
-           env: Map[String, String])(
-                 implicit ec: ExecutionContext): AsyncExecResult =
+  def execAsync(cmd: String, env: Map[String, String])(
+      implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "), env = env)(ec)
 
   /**

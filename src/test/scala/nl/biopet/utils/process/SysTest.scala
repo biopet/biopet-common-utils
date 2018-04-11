@@ -21,11 +21,14 @@
 
 package nl.biopet.utils.process
 
+import java.io.File
+import java.nio.file.Files
+
 import nl.biopet.test.BiopetTest
 import org.testng.annotations.Test
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
 class SysTest extends BiopetTest {
@@ -82,6 +85,41 @@ class SysTest extends BiopetTest {
     Sys.maxRunningProcesses = 1
     val process = Sys.execAsync(Seq("echo", "bla"))
     process.cancel()
+  }
+
+  @Test
+  def testCwd(): Unit = {
+    val testDir = Files.createTempDirectory("test").toFile
+    testDir.mkdirs()
+    new File(testDir, "file1").createNewFile()
+    new File(testDir, "file2").createNewFile()
+    val processNormal = Sys.exec("ls", cwd = Some(testDir))
+    val processAsync =
+      Await.result(Sys.execAsync("ls", cwd = Some(testDir)).get, Duration.Inf)
+    for (process <- Seq(processNormal, processAsync)) {
+      process._1 shouldBe 0
+      process._2 should contain
+      "file1"
+      process._2 should contain
+      "file2"
+      process._3 shouldBe ""
+    }
+  }
+
+  @Test
+  def testEnv(): Unit = {
+    val process = Sys.exec("printenv TEST", Map("TEST" -> "TestMessage"))
+    process._1 shouldBe 0
+    process._2 shouldBe "TestMessage\n"
+    process._3 shouldBe ""
+  }
+
+  def testEnvAsync(): Unit = {
+    val process = Sys.execAsync("printenv TEST", Map("TEST" -> "TestMessage"))
+    val result = Await.result(process.get, Duration.Inf)
+    result._1 shouldBe 0
+    result._2 shouldBe "TestMessage\n"
+    result._3 shouldBe ""
   }
 
 }
