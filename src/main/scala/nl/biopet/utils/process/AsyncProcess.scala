@@ -107,7 +107,9 @@ trait Sys {
 
   /**
     * executes the cmd and blocks until the command exits.
-    *
+    * @param cmd The command to be executed.
+    * @param cwd Current Working Directory for the process
+    * @param env Extra environment variables for the process
     * @return {{{(ExitValue, Stdout, Stderr)}}}
     *         <pre>if the executable is unable to start, (-1, "", stderr) are returned</pre>
     */
@@ -138,7 +140,10 @@ trait Sys {
   /**
     * executes the cmd asynchronous
     * @see scala.concurrent.Future.map
-    *
+    * @param cmd The command to be executed.
+    * @param cwd Current Working Directory for the process
+    * @param env Extra environment variables for the process
+    * @param ec
     * @return [[AsyncExecResult]]
     */
   def execAsync(cmd: Seq[String],
