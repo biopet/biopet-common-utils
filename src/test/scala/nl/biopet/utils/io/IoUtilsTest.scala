@@ -24,7 +24,7 @@ package nl.biopet.utils.io
 import java.io.{File, FileNotFoundException, IOException, PrintWriter}
 import java.net.URL
 import java.nio.file.Files
-
+import org.apache.commons.io.FileUtils
 import scala.util.matching.Regex
 import nl.biopet.test.BiopetTest
 import org.testng.annotations.{AfterClass, Test}
@@ -49,7 +49,7 @@ class IoUtilsTest extends BiopetTest {
   @AfterClass
   def deleteTempDirs(): Unit = {
     tempDirs.foreach { dir =>
-      deleteDirectory(dir)
+      FileUtils.deleteDirectory(dir)
     }
   }
 
@@ -169,13 +169,15 @@ class IoUtilsTest extends BiopetTest {
     val downloadLink: URL =
       new URL(
         "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.md")
-    getSha256SumFromDownload(downloadLink) shouldBe Some(
+    getSha256SumFromDownloadOption(downloadLink) shouldBe Some(
       "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901")
+    getSha256SumFromDownload(downloadLink) shouldBe "186e801bf3cacbd564b4ec00815352218038728bd6787b71f65db474a3588901"
     intercept[java.io.FileNotFoundException] {
       getSha256SumFromDownload(new URL(downloadLink.toString + "nonsense"))
     }.getMessage shouldBe
       "File not found. Could not generate sha256 on url: " +
         "https://raw.githubusercontent.com/biopet/biopet/be7838f27f3cad9f80191d92a4a795c34d1ae092/README.mdnonsense"
+    getSha256SumFromDownloadOption(new URL(downloadLink.toString + "nonsense")) shouldBe None
   }
 
   @Test

@@ -53,18 +53,6 @@ package object io {
   }
 
   /**
-    * Deletes a directory recursively
-    * @param dir directory to be deleted
-    */
-  def deleteDirectory(dir: File): Unit = {
-    require(dir.isDirectory)
-    dir.listFiles.foreach(file => {
-      if (file.isDirectory) deleteDirectory(file)
-      else file.delete()
-    })
-  }
-
-  /**
     * Finds a file in a specified directory.
     * @param dir directory to be searched
     * @param regex optional regex. Files matching this regex will be returned.
