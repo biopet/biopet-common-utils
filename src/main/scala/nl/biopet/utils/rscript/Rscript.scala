@@ -39,7 +39,7 @@ import scala.sys.process.ProcessLogger
 trait Rscript extends Logging {
   protected def scriptPath: String
 
-  protected def rscriptExecutable: String = "rscript"
+  protected def rscriptExecutable: String = "Rscript"
 
   if (!Rscript.alreadyCopied.contains(scriptPath)) {
     val rScript: File = File.createTempFile(scriptPath, ".R")
