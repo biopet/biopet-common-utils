@@ -34,48 +34,48 @@ import nl.biopet.utils.SemanticVersion._
 class SemanticVersionTest extends BiopetTest {
 
   val semanticVersion = "1.2.3"
-  val semanticVersionWith_v = "v1.2.3"
-  val semanticVersionWith_V = "V1.2.3"
+  val semanticVersionWith1 = "v1.2.3"
+  val semanticVersionWith2 = "V1.2.3"
   val semanticVersionWithBuild = "1.2.3-alpha0.1"
   val nonSemanticVersion = "v1222.1"
 
   @Test
   def testIsSemantic(): Unit = {
-    isSemanticVersion(semanticVersion) shouldBe true
-    isSemanticVersion(semanticVersionWithBuild) shouldBe true
-    isSemanticVersion(nonSemanticVersion) shouldBe false
+    canParse(semanticVersion) shouldBe true
+    canParse(semanticVersionWithBuild) shouldBe true
+    canParse(nonSemanticVersion) shouldBe false
   }
 
   @Test
   def testMajorVersion(): Unit = {
-    getSemanticVersion(semanticVersion).map(_.major) shouldBe Some(1)
-    getSemanticVersion(semanticVersionWith_v).map(_.major) shouldBe Some(1)
-    getSemanticVersion(semanticVersionWith_V).map(_.major) shouldBe Some(1)
-    getSemanticVersion(semanticVersionWithBuild).map(_.major) shouldBe Some(1)
+    fromString(semanticVersion).map(_.major) shouldBe Some(1)
+    fromString(semanticVersionWith1).map(_.major) shouldBe Some(1)
+    fromString(semanticVersionWith2).map(_.major) shouldBe Some(1)
+    fromString(semanticVersionWithBuild).map(_.major) shouldBe Some(1)
   }
 
   @Test
   def testMinorVersion(): Unit = {
-    getSemanticVersion(semanticVersion).map(_.minor) shouldBe Some(2)
-    getSemanticVersion(semanticVersionWith_v).map(_.minor) shouldBe Some(2)
-    getSemanticVersion(semanticVersionWith_V).map(_.minor) shouldBe Some(2)
-    getSemanticVersion(semanticVersionWithBuild).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersion).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersionWith1).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersionWith2).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(2)
   }
 
   @Test
   def testPatchVersion(): Unit = {
-    getSemanticVersion(semanticVersion).map(_.patch) shouldBe Some(3)
-    getSemanticVersion(semanticVersionWith_v).map(_.patch) shouldBe Some(3)
-    getSemanticVersion(semanticVersionWith_V).map(_.patch) shouldBe Some(3)
-    getSemanticVersion(semanticVersionWithBuild).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersion).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersionWith1).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersionWith2).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(3)
   }
 
   @Test
   def testBuildVersion(): Unit = {
-    getSemanticVersion(semanticVersion).flatMap(_.build) shouldBe None
-    getSemanticVersion(semanticVersionWith_v).flatMap(_.build) shouldBe None
-    getSemanticVersion(semanticVersionWith_V).flatMap(_.build) shouldBe None
-    getSemanticVersion(semanticVersionWithBuild).flatMap(_.build) shouldBe Some(
+    fromString(semanticVersion).flatMap(_.build) shouldBe None
+    fromString(semanticVersionWith1).flatMap(_.build) shouldBe None
+    fromString(semanticVersionWith2).flatMap(_.build) shouldBe None
+    fromString(semanticVersionWithBuild).flatMap(_.build) shouldBe Some(
       "alpha0.1")
   }
 

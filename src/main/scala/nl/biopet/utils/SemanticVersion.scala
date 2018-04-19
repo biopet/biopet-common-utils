@@ -32,29 +32,21 @@ case class SemanticVersion(major: Int,
   def >(that: SemanticVersion): Boolean = {
     if (this.major != that.major) this.major > that.major
     else if (this.minor != that.minor) this.minor > that.minor
-    else if (this.patch != that.patch) this.patch > that.patch
-    else false
+    else this.patch > that.patch
   }
 
   def <(that: SemanticVersion): Boolean = {
     if (this.major != that.major) this.major < that.major
     else if (this.minor != that.minor) this.minor < that.minor
-    else if (this.patch != that.patch) this.patch < that.patch
-    else false
+    else this.patch < that.patch
   }
 
   def >=(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major > that.major
-    else if (this.minor != that.minor) this.minor > that.minor
-    else if (this.patch != that.patch) this.patch > that.patch
-    else true
+    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this > that
   }
 
   def <=(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major < that.major
-    else if (this.minor != that.minor) this.minor < that.minor
-    else if (this.patch != that.patch) this.patch < that.patch
-    else true
+    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this < that
   }
 }
 
@@ -67,8 +59,7 @@ object SemanticVersion {
     * @param version version string
     * @return boolean
     */
-  def isSemanticVersion(version: String): Boolean =
-    getSemanticVersion(version).isDefined
+  def canParse(version: String): Boolean = fromString(version).isDefined
 
   /**
     * Check whether a version string is a semantic version.
@@ -77,7 +68,7 @@ object SemanticVersion {
     * @param version version string
     * @return SemanticVersion case class
     */
-  def getSemanticVersion(version: String): Option[SemanticVersion] = {
+  def fromString(version: String): Option[SemanticVersion] = {
     version match {
       case semanticVersionRegex(major, minor, patch, build) =>
         Some(
