@@ -161,15 +161,27 @@ class ConversionsTest extends BiopetTest {
 
   @Test
   def testListMapToYaml(): Unit = {
-    val listMap = ListMap("a" -> 1, "d" -> 2, "c" -> 3, "e" -> 4, "b" -> 5)
-    listMapToYaml(listMap) shouldBe
-      """a: 1
+    val listMap = ListMap(
+      "a" -> ListMap("a" -> 1, "d" -> 4, "b" -> 2, "c" -> 3),
+      "d" -> 2,
+      "c" -> 3,
+      "e" -> 4,
+      "b" -> 5)
+    val yaml = listMapToYaml(listMap)
+    val unorderdedYaml = mapToYaml(listMap)
+
+    yaml shouldBe
+      """a:
+        |  a: 1
+        |  d: 4
+        |  b: 2
+        |  c: 3
         |d: 2
         |c: 3
         |e: 4
         |b: 5
         |""".stripMargin
-    listMapToYaml(listMap) should not equal mapToYaml(listMap)
+    yaml should not equal unorderdedYaml
   }
 
   @Test

@@ -120,7 +120,7 @@ package object conversions {
     * @return a string in yaml format
     */
   def mapToYaml(map: Map[String, Any]): String =
-    yaml.dumpAsMap(yaml.load(Json.stringify(mapToJson(map))))
+    yaml.dumpAsMap(yaml.load(mapToJson(map).toString()))
 
   /**
     * Writes a map to a yaml file.
