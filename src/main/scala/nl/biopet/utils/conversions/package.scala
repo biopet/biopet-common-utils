@@ -28,7 +28,7 @@ import org.yaml.snakeyaml.Yaml
 import play.api.libs.json._
 
 import scala.collection.JavaConversions._
-import scala.io.Source
+import scala.collection.immutable.ListMap
 
 package object conversions {
 
@@ -99,6 +99,20 @@ package object conversions {
   }
 
   lazy val yaml = new Yaml()
+
+  /**
+    * Converts a ListMap to an ordered YAML string.
+    * @param listMap the listmap
+    * @return a YAML string
+    */
+  def listMapToYaml(listMap: ListMap[String, Any]): String = {
+    val newMap: util.LinkedHashMap[String, Object] = new util.LinkedHashMap()
+    listMap.foreach {
+      case (key, value) =>
+        newMap.put(key, yaml.load(anyToJson(value).toString()))
+    }
+    yaml.dumpAsMap(newMap)
+  }
 
   /**
     * Converts a Map[String,Any] to a human-readable YAML

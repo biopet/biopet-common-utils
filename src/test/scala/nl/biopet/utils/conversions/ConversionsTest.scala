@@ -35,6 +35,7 @@ import play.api.libs.json.{
   JsString
 }
 
+import scala.collection.immutable.ListMap
 import scala.io.Source
 
 class ConversionsTest extends BiopetTest {
@@ -156,6 +157,19 @@ class ConversionsTest extends BiopetTest {
                                                                 "" +
                                                                   "  bla: 4",
                                                                 "")
+  }
+
+  @Test
+  def testListMapToYaml(): Unit = {
+    val listMap = ListMap("a" -> 1, "d" -> 2, "c" -> 3, "e" -> 4, "b" -> 5)
+    listMapToYaml(listMap) shouldBe
+      """a: 1
+        |d: 2
+        |c: 3
+        |e: 4
+        |b: 5
+        |""".stripMargin
+    listMapToYaml(listMap) should not equal mapToYaml(listMap)
   }
 
   @Test
