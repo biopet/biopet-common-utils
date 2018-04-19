@@ -21,6 +21,7 @@
 
 package nl.biopet.utils
 
+import nl.biopet.test.BiopetTest
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.Test
@@ -30,7 +31,7 @@ import nl.biopet.utils.SemanticVersion._
   * Created by Sander Bollen on 12-10-16.
   * Here we test [[SemanticVersion]]
   */
-class SemanticVersionTest extends TestNGSuite with Matchers {
+class SemanticVersionTest extends BiopetTest {
 
   val semanticVersion = "1.2.3"
   val semanticVersionWith_v = "v1.2.3"
