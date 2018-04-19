@@ -25,6 +25,7 @@ import java.io.File
 import java.nio.file.Files
 
 import nl.biopet.test.BiopetTest
+import nl.biopet.utils.process.Sys.{ExitValue, Stderr, Stdout}
 import org.testng.annotations.Test
 
 import scala.concurrent.Await
@@ -35,35 +36,47 @@ class SysTest extends BiopetTest {
   @Test
   def testCmd(): Unit = {
     val process = Sys.exec("echo bla")
-    process._1 shouldBe 0
-    process._2 shouldBe "bla\n"
-    process._3 shouldBe ""
+    process match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "bla\n"
+        stderr shouldBe ""
+    }
   }
 
   @Test
   def testCmdSeq(): Unit = {
     val process = Sys.exec(Seq("echo", "bla"))
-    process._1 shouldBe 0
-    process._2 shouldBe "bla\n"
-    process._3 shouldBe ""
+    process match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "bla\n"
+        stderr shouldBe ""
+    }
   }
 
   @Test
   def testCmdAsync(): Unit = {
     val process = Sys.execAsync("echo bla")
     val result = Await.result(process.get, Duration.Inf)
-    result._1 shouldBe 0
-    result._2 shouldBe "bla\n"
-    result._3 shouldBe ""
+    result match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "bla\n"
+        stderr shouldBe ""
+    }
   }
 
   @Test
   def testCmdSeqAsync(): Unit = {
     val process = Sys.execAsync(Seq("echo", "bla"))
     val result = Await.result(process.get, Duration.Inf)
-    result._1 shouldBe 0
-    result._2 shouldBe "bla\n"
-    result._3 shouldBe ""
+    result match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "bla\n"
+        stderr shouldBe ""
+    }
   }
 
   @Test
@@ -74,9 +87,12 @@ class SysTest extends BiopetTest {
     val process3 = Sys.execAsync(Seq("echo", "bla"))
     List(process, process2, process3).foreach { p =>
       val result = Await.result(p.get, Duration.Inf)
-      result._1 shouldBe 0
-      result._2 shouldBe "bla\n"
-      result._3 shouldBe ""
+      result match {
+        case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+          exit shouldBe 0
+          stdout shouldBe "bla\n"
+          stderr shouldBe ""
+      }
     }
   }
 
@@ -97,29 +113,35 @@ class SysTest extends BiopetTest {
     val processAsync =
       Await.result(Sys.execAsync("ls", cwd = Some(testDir)).get, Duration.Inf)
     for (process <- Seq(processNormal, processAsync)) {
-      process._1 shouldBe 0
-      process._2 should contain
-      "file1"
-      process._2 should contain
-      "file2"
-      process._3 shouldBe ""
+      process match {
+        case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+          exit shouldBe 0
+          stdout should include("file1")
+          stdout should include("file2")
+          stderr shouldBe ""
+      }
     }
   }
-
   @Test
   def testEnv(): Unit = {
     val process = Sys.exec("printenv TEST", Map("TEST" -> "TestMessage"))
-    process._1 shouldBe 0
-    process._2 shouldBe "TestMessage\n"
-    process._3 shouldBe ""
+    process match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "TestMessage\n"
+        stderr shouldBe ""
+    }
   }
 
   def testEnvAsync(): Unit = {
     val process = Sys.execAsync("printenv TEST", Map("TEST" -> "TestMessage"))
     val result = Await.result(process.get, Duration.Inf)
-    result._1 shouldBe 0
-    result._2 shouldBe "TestMessage\n"
-    result._3 shouldBe ""
+    result match {
+      case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
+        exit shouldBe 0
+        stdout shouldBe "TestMessage\n"
+        stderr shouldBe ""
+    }
   }
 
 }
