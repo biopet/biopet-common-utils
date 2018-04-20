@@ -35,6 +35,7 @@ import play.api.libs.json.{
   JsString
 }
 
+import scala.collection.immutable.ListMap
 import scala.io.Source
 
 class ConversionsTest extends BiopetTest {
@@ -156,6 +157,31 @@ class ConversionsTest extends BiopetTest {
                                                                 "" +
                                                                   "  bla: 4",
                                                                 "")
+  }
+
+  @Test
+  def testListMapToYaml(): Unit = {
+    val listMap = ListMap(
+      "a" -> ListMap("a" -> 1, "d" -> 4, "b" -> 2, "c" -> 3),
+      "d" -> 2,
+      "c" -> 3,
+      "e" -> 4,
+      "b" -> 5)
+    val yaml = listMapToYaml(listMap)
+    val unorderdedYaml = mapToYaml(listMap)
+
+    yaml shouldBe
+      """a:
+        |  a: 1
+        |  d: 4
+        |  b: 2
+        |  c: 3
+        |d: 2
+        |c: 3
+        |e: 4
+        |b: 5
+        |""".stripMargin
+    yaml should not equal unorderdedYaml
   }
 
   @Test

@@ -23,6 +23,7 @@ package nl.biopet.utils
 
 import java.io.File
 
+import nl.biopet.test.BiopetTest
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.Test
@@ -32,7 +33,7 @@ import scala.io.Source
 /**
   * Created by pjvan_thof on 19-7-16.
   */
-class CountsTest extends TestNGSuite with Matchers {
+class CountsTest extends BiopetTest {
   @Test
   def testValues(): Unit = {
     val data: Map[String, Long] = Map("1" -> 1, "2" -> 2, "3" -> 3)
