@@ -30,7 +30,34 @@ case class SemanticVersion(major: Int,
                            minor: Int,
                            patch: Int,
                            build: Option[String] = None)
-    extends Ordering[SemanticVersion] {
+    extends Ordered[SemanticVersion] {
+
+  def ==(that: SemanticVersion): Boolean = {
+    this.major == that.major &&
+    this.minor == that.minor &&
+    this.patch == that.patch &&
+    this.build == that.build
+  }
+  override def >(that: SemanticVersion): Boolean = {
+    if (this.major != that.major) this.major > that.major
+    else if (this.minor != that.minor) this.minor > that.minor
+    else this.patch > that.patch
+  }
+
+  override def <(that: SemanticVersion): Boolean = {
+    if (this.major != that.major) this.major < that.major
+    else if (this.minor != that.minor) this.minor < that.minor
+    else this.patch < that.patch
+  }
+
+  override def >=(that: SemanticVersion): Boolean = {
+    this == that || this > that
+  }
+
+  override def <=(that: SemanticVersion): Boolean = {
+    this == that || this < that
+  }
+
   /**
     * Converts the build to an Int for comparison purposes
     * @return an integer
@@ -61,43 +88,23 @@ case class SemanticVersion(major: Int,
     */
   def toInt(): Int = {
     // Int.MaxValue == 2147483647
-    require(major < 214, "With a major value higher than 213 this class cannot be sorted.")
-    require(minor < 100, "With a minor value higher than 99 this class cannot be sorted.")
-    require(patch < 100, "With a patch value higher than 99 this class cannot be sorted.")
+    require(
+      major < 214,
+      s"With a major value higher than 213 this class cannot be sorted. Major: $major")
+    require(
+      minor < 100,
+      s"With a minor value higher than 99 this class cannot be sorted. Minor: $minor")
+    require(
+      patch < 100,
+      s"With a patch value higher than 99 this class cannot be sorted. Patch: $patch")
     this.major * pow(10, 7) +
       this.minor * pow(10, 5) +
       this.patch * pow(10, 3) +
       buildToInt()
   }.toInt
 
-  def compare(x: SemanticVersion, y: SemanticVersion): Int = {
-    x.toInt() - y.toInt()
-  }
-
-  def ==(that: SemanticVersion): Boolean = {
-    this.major == that.major &&
-    this.minor == that.minor &&
-    this.patch == that.patch &&
-    this.build == that.build
-  }
-  def >(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major > that.major
-    else if (this.minor != that.minor) this.minor > that.minor
-    else this.patch > that.patch
-  }
-
-  def <(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major < that.major
-    else if (this.minor != that.minor) this.minor < that.minor
-    else this.patch < that.patch
-  }
-
-  def >=(that: SemanticVersion): Boolean = {
-    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this > that
-  }
-
-  def <=(that: SemanticVersion): Boolean = {
-    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this < that
+  def compare(that: SemanticVersion): Int = {
+    this.toInt() - that.toInt()
   }
 }
 
