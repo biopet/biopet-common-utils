@@ -141,18 +141,18 @@ class SemanticVersionTest extends BiopetTest {
                                 "v1.0.3",
                                 "2.3.3")
   }
-
-  @Test
-  def testCrashOnBigVersionSort: Unit = {
-    intercept[IllegalArgumentException] {
-      Seq(new SemanticVersion(300, 1, 1), new SemanticVersion(1, 1, 1)).sorted
-    }.getMessage shouldBe s"requirement failed: With a major value higher than 213 this class cannot be sorted. Major: 300"
-    intercept[IllegalArgumentException] {
-      Seq(new SemanticVersion(1, 100, 1), new SemanticVersion(1, 1, 1)).sorted
-    }.getMessage shouldBe s"requirement failed: With a minor value higher than 99 this class cannot be sorted. Minor: 100"
-    intercept[IllegalArgumentException] {
-      Seq(new SemanticVersion(1, 1, 100), new SemanticVersion(1, 1, 1)).sorted
-    }.getMessage shouldBe s"requirement failed: With a patch value higher than 99 this class cannot be sorted. Patch: 100"
+  def testBigVersionSort(): Unit = {
+    val versions = Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha", "0.8.0-beta")
+    val sortedVersions = versions.sortBy(version =>
+      fromString(version) match {
+        case Some(semVer) => semVer
+        case _            => new SemanticVersion(0, 0, 0)
+      })
+    sortedVersions shouldBe Seq("0.8.0-alpha",
+      "0.8.0-beta",
+      "0.8.0",
+      "v1.0.3",
+      "2.3.3")
   }
 
 }

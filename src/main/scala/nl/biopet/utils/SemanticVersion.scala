@@ -22,7 +22,7 @@
 package nl.biopet.utils
 import scala.util.matching.Regex
 import scala.math.pow
-
+import scala.math.Ordered.orderingToOrdered
 /**
   * Created by pjvanthof on 29/04/2017.
   */
@@ -38,73 +38,28 @@ case class SemanticVersion(major: Int,
     this.patch == that.patch &&
     this.build == that.build
   }
-  override def >(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major > that.major
-    else if (this.minor != that.minor) this.minor > that.minor
-    else this.patch > that.patch
-  }
 
-  override def <(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major < that.major
-    else if (this.minor != that.minor) this.minor < that.minor
-    else this.patch < that.patch
-  }
-
-  override def >=(that: SemanticVersion): Boolean = {
-    this == that || this > that
-  }
-
-  override def <=(that: SemanticVersion): Boolean = {
-    this == that || this < that
-  }
-
-  /**
-    * Converts the build to an Int for comparison purposes
-    * @return an integer
-    */
-  def buildToInt(): Int = {
-    // TODO: Improve algorithm for buildToInt
-    build match {
-      case Some(string) =>
-        // Currently only sorting on the first character of the build.
-        string.toCharArray.headOption match {
-          // The values are arbitrary. I have range -999 to 999 available for comparing the build.
-          // If a build is attached it should rank lower than the release. Therefore penalize.
-          // 100-char.asDigit. If build starts with "b" (11) this number will be higher than
-          // if it starts with a (10). Beta is higher than alpha.
-          case Some(char) =>
-            if (char.asDigit < 0) -150 else -(100 - char.asDigit)
-          // If empty => 0. If no build is attached this is the release.
-          case _ => 0
-        }
-      case _ => 0
+  def buildToNumberString: String = {
+    def stringToDigit(string: String): String = {
+      val charArray = string.toCharArray
+      val digitArray = charArray.map(_.asDigit)
+      val stringArray = digitArray.map(d => d match {
+        case -1 => "00"
+        case _ => if (d < 10) "0" + d.toString else d.toString
+      })
+      if (string.isEmpty) "" else stringArray.toString
+    }
+    this.build match {
+      case Some(string) => string match {
+        case "" => Long.MaxValue.toString
+        case _ => stringToDigit(string)
+      }
+      case _ => Long.MaxValue.toString
     }
   }
 
-  /**
-    * Converts this version to an integer for comparison purposes
-    * Does not work properly with major, minor, or patch versions > 100
-    * @return the build to int.
-    */
-  def toInt(): Int = {
-    // Int.MaxValue == 2147483647
-    require(
-      major < 214,
-      s"With a major value higher than 213 this class cannot be sorted. Major: $major")
-    require(
-      minor < 100,
-      s"With a minor value higher than 99 this class cannot be sorted. Minor: $minor")
-    require(
-      patch < 100,
-      s"With a patch value higher than 99 this class cannot be sorted. Patch: $patch")
-    this.major * pow(10, 7) +
-      this.minor * pow(10, 5) +
-      this.patch * pow(10, 3) +
-      buildToInt()
-  }.toInt
-
   def compare(that: SemanticVersion): Int = {
-    this.toInt() - that.toInt()
+    (this.major,this.minor,this.patch) compare (that.major,that.minor,that.patch)
   }
 }
 
