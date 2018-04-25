@@ -37,7 +37,7 @@ case class Build(build: String) extends Ordered[Build] {
     else this.build compare that.build
   }
 
-  def ==(that: Build) = {
+  def ==(that: Build): Boolean = {
     this.build == that.build
   }
 }

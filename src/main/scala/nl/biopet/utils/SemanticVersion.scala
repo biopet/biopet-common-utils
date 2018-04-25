@@ -20,9 +20,8 @@
  */
 
 package nl.biopet.utils
-import scala.util.matching.Regex
-import scala.math.pow
 import scala.math.Ordered.orderingToOrdered
+import scala.util.matching.Regex
 
 /**
   * Created by pjvanthof on 29/04/2017.
@@ -34,9 +33,9 @@ case class SemanticVersion(major: Int,
     extends Ordered[SemanticVersion] {
 
   // buildClass is only used for comparison purposes.
-  val buildClass = build match {
-    case Some(string) => new Build(string)
-    case _            => new Build("")
+  val buildClass: Build = build match {
+    case Some(string) => Build(string)
+    case _            => Build("")
   }
 
   def ==(that: SemanticVersion): Boolean = {

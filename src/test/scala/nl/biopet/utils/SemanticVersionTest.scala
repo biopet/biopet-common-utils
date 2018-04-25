@@ -25,8 +25,6 @@ import nl.biopet.test.BiopetTest
 import nl.biopet.utils.SemanticVersion._
 import org.testng.annotations.Test
 
-import scala.reflect.internal.MissingRequirementError
-
 /**
   * Created by Sander Bollen on 12-10-16.
   * Here we test [[SemanticVersion]]
