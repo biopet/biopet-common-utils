@@ -20,6 +20,7 @@
  */
 
 package nl.biopet.utils
+import scala.math.Ordered.orderingToOrdered
 import scala.util.matching.Regex
 
 /**
@@ -28,25 +29,36 @@ import scala.util.matching.Regex
 case class SemanticVersion(major: Int,
                            minor: Int,
                            patch: Int,
-                           build: Option[String] = None) {
-  def >(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major > that.major
-    else if (this.minor != that.minor) this.minor > that.minor
-    else this.patch > that.patch
+                           build: Option[String] = None)
+    extends Ordered[SemanticVersion] {
+
+  def ==(that: SemanticVersion): Boolean = {
+    this.major == that.major &&
+    this.minor == that.minor &&
+    this.patch == that.patch &&
+    this.build == that.build
   }
 
-  def <(that: SemanticVersion): Boolean = {
-    if (this.major != that.major) this.major < that.major
-    else if (this.minor != that.minor) this.minor < that.minor
-    else this.patch < that.patch
-  }
-
-  def >=(that: SemanticVersion): Boolean = {
-    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this > that
-  }
-
-  def <=(that: SemanticVersion): Boolean = {
-    (this.major == that.major && this.minor == that.minor && this.patch == that.patch) || this < that
+  /**
+    * Checks whether one version is later than another.
+    * Versions without builds (no -alpha, -SNAPSHOT or -build123)
+    * are assumed to be later than versions with builds.
+    * Example 0.8.0-alpha < 0.8.0-beta < 0.8.0
+    * @param that
+    * @return
+    */
+  def compare(that: SemanticVersion): Int = {
+    val versionCompare = (this.major, this.minor, this.patch) compare (that.major, that.minor, that.patch)
+    if (versionCompare == 0) {
+      // Empty builds should always be greatest.
+      // Example 0.8.0-alpha < 0.8.0 and 1.0.2-SNAPSHOT < 1.0.2
+      (this.build, that.build) match {
+        case (Some(_), None)    => -1
+        case (None, Some(_))    => +1
+        case (Some(a), Some(b)) => a compare b
+        case _                  => 0
+      }
+    } else versionCompare
   }
 }
 
@@ -79,5 +91,4 @@ object SemanticVersion {
       case _ => None
     }
   }
-
 }
