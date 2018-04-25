@@ -1,5 +1,10 @@
 package nl.biopet.utils
 
+/**
+  * A class that is a string, but orders differently
+  * Empty builds are largest instead of smallest
+  * @param build The build as a string.
+  */
 case class Build(build: String) extends Ordered[Build] {
   override def toString: String = this.build
 
@@ -11,7 +16,7 @@ case class Build(build: String) extends Ordered[Build] {
     else this.build compare that.build
   }
 
-  def ==(that: Build) ={
+  def ==(that: Build) = {
     this.build == that.build
   }
 }

@@ -33,6 +33,12 @@ case class SemanticVersion(major: Int,
                            build: Option[String] = None)
     extends Ordered[SemanticVersion] {
 
+  // buildClass is only used for comparison purposes.
+  val buildClass = build match {
+    case Some(string) => new Build(string)
+    case _            => new Build("")
+  }
+
   def ==(that: SemanticVersion): Boolean = {
     this.major == that.major &&
     this.minor == that.minor &&
@@ -40,29 +46,8 @@ case class SemanticVersion(major: Int,
     this.build == that.build
   }
 
-  def buildToNumberString: String = {
-    def stringToDigit(string: String): String = {
-      val charArray = string.toCharArray
-      val digitArray = charArray.map(_.asDigit)
-      val stringArray = digitArray.map(d =>
-        d match {
-          case -1 => "00"
-          case _  => if (d < 10) "0" + d.toString else d.toString
-      })
-      if (string.isEmpty) "" else stringArray.toString
-    }
-    this.build match {
-      case Some(string) =>
-        string match {
-          case "" => Long.MaxValue.toString
-          case _  => stringToDigit(string)
-        }
-      case _ => Long.MaxValue.toString
-    }
-  }
-
   def compare(that: SemanticVersion): Int = {
-    (this.major, this.minor, this.patch) compare (that.major, that.minor, that.patch)
+    (this.major, this.minor, this.patch, this.buildClass) compare (that.major, that.minor, that.patch, that.buildClass)
   }
 }
 
