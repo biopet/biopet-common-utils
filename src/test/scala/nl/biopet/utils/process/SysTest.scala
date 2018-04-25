@@ -35,7 +35,7 @@ import scala.concurrent.duration.Duration
 class SysTest extends BiopetTest {
   @Test
   def testCmd(): Unit = {
-    val process = Sys.exec("echo bla")
+    val process = Sys.execString("echo bla")
     process match {
       case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
         exit shouldBe 0
@@ -57,7 +57,7 @@ class SysTest extends BiopetTest {
 
   @Test
   def testCmdAsync(): Unit = {
-    val process = Sys.execAsync("echo bla")
+    val process = Sys.execAsyncString("echo bla")
     val result = Await.result(process.get, Duration.Inf)
     result match {
       case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
@@ -109,9 +109,9 @@ class SysTest extends BiopetTest {
     testDir.mkdirs()
     new File(testDir, "file1").createNewFile()
     new File(testDir, "file2").createNewFile()
-    val processNormal = Sys.exec("ls", cwd = Some(testDir))
+    val processNormal = Sys.execString("ls", cwd = Some(testDir))
     val processAsync =
-      Await.result(Sys.execAsync("ls", cwd = Some(testDir)).get, Duration.Inf)
+      Await.result(Sys.execAsyncString("ls", cwd = Some(testDir)).get, Duration.Inf)
     for (process <- Seq(processNormal, processAsync)) {
       process match {
         case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
@@ -124,7 +124,7 @@ class SysTest extends BiopetTest {
   }
   @Test
   def testEnv(): Unit = {
-    val process = Sys.exec("printenv TEST", Map("TEST" -> "TestMessage"))
+    val process = Sys.execString("printenv TEST", env=Map("TEST" -> "TestMessage"))
     process match {
       case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
         exit shouldBe 0
@@ -134,7 +134,7 @@ class SysTest extends BiopetTest {
   }
 
   def testEnvAsync(): Unit = {
-    val process = Sys.execAsync("printenv TEST", Map("TEST" -> "TestMessage"))
+    val process = Sys.execAsyncString("printenv TEST", env=Map("TEST" -> "TestMessage"))
     val result = Await.result(process.get, Duration.Inf)
     result match {
       case (exit: ExitValue, stdout: Stdout, stderr: Stderr) =>
