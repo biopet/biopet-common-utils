@@ -32,9 +32,11 @@ case class Build(build: String) extends Ordered[Build] {
   def compare(that: Build): Int = {
     // Empty builds should always be greatest.
     // Example 0.8.0-alpha < 0.8.0 and 1.0.2-SNAPSHOT < 1.0.2
-    if (this.build.isEmpty && !that.build.isEmpty) Int.MaxValue
-    else if (!this.build.isEmpty && that.build.isEmpty) Int.MinValue
-    else this.build compare that.build
+    (this.build.isEmpty, that.build.isEmpty) match {
+      case (true, false) => Int.MaxValue
+      case (false, true) => Int.MinValue
+      case _ => this.build compare that.build
+    }
   }
 
   def ==(that: Build): Boolean = {
