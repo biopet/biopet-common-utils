@@ -10,8 +10,8 @@ case class Build(build: String) extends Ordered[Build] {
     else if (!this.build.isEmpty && that.build.isEmpty) Int.MinValue
     else this.build compare that.build
   }
-}
 
-object Build {
-  def fromString(string: String): Build = new Build(string)
+  def ==(that: Build) ={
+    this.build == that.build
+  }
 }
