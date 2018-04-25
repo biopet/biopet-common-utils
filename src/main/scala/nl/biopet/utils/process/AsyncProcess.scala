@@ -131,10 +131,11 @@ trait Sys {
       .get
   }
 
-  def execAsyncString(cmd: String, cwd: Option[File] = None, env: Map[String, String] = Map())(
+  def execAsyncString(cmd: String,
+                      cwd: Option[File] = None,
+                      env: Map[String, String] = Map())(
       implicit ec: ExecutionContext): AsyncExecResult =
     execAsync(cmd.split(" "), cwd, env)(ec)
-
 
   /**
     * executes the cmd asynchronous
