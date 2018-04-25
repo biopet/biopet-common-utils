@@ -133,22 +133,22 @@ class SemanticVersionTest extends BiopetTest {
     val sortedVersions = versions.sortBy(version =>
       fromString(version) match {
         case Some(semVer) => semVer
-        case _ => new SemanticVersion(0, 0, 0)
-      })
+        case _            => new SemanticVersion(0, 0, 0)
+    })
     sortedVersions shouldBe Seq("0.8.0-alpha",
-      "0.8.0-beta",
-      "0.8.0",
-      "v1.0.3",
-      "2.3.3")
+                                "0.8.0-beta",
+                                "0.8.0",
+                                "v1.0.3",
+                                "2.3.3")
   }
 
   def testBigVersionSort(): Unit = {
     // Exceeding Int.MaxValue for the love of it.
     val versions = Seq(
       "v1100.231.41",
-      s"${Int.MaxValue+20}.1.1",
-      s"${Int.MaxValue+10}.123.3-ZZx4",
-      s"${Int.MaxValue+10}.123.3-ZZx5",
+      s"${Int.MaxValue + 20}.1.1",
+      s"${Int.MaxValue + 10}.123.3-ZZx4",
+      s"${Int.MaxValue + 10}.123.3-ZZx5",
       "2.82312123213.31231-XYZbladsa",
       "2.97567567565445.321-beta"
     )
@@ -161,9 +161,9 @@ class SemanticVersionTest extends BiopetTest {
       "2.82312123213.31231-XYZbladsa",
       "2.97567567565445.321-beta",
       "v1100.231.41",
-      s"${Int.MaxValue+10}.123.3-ZZx4",
-      s"${Int.MaxValue+10}.123.3-ZZx5",
-      s"${Int.MaxValue+20}.1.1"
+      s"${Int.MaxValue + 10}.123.3-ZZx4",
+      s"${Int.MaxValue + 10}.123.3-ZZx5",
+      s"${Int.MaxValue + 20}.1.1"
     )
   }
 
