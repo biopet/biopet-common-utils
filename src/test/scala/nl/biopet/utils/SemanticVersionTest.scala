@@ -147,12 +147,12 @@ class SemanticVersionTest extends BiopetTest {
       fromString(version) match {
         case Some(semVer) => semVer
         case _            => new SemanticVersion(0, 0, 0)
-      })
+    })
     sortedVersions shouldBe Seq("0.8.0-alpha",
-      "0.8.0-beta",
-      "0.8.0",
-      "v1.0.3",
-      "2.3.3")
+                                "0.8.0-beta",
+                                "0.8.0",
+                                "v1.0.3",
+                                "2.3.3")
   }
 
 }
