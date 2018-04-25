@@ -22,10 +22,8 @@
 package nl.biopet.utils
 
 import nl.biopet.test.BiopetTest
-import org.scalatest.Matchers
-import org.scalatest.testng.TestNGSuite
-import org.testng.annotations.Test
 import nl.biopet.utils.SemanticVersion._
+import org.testng.annotations.Test
 
 /**
   * Created by Sander Bollen on 12-10-16.
@@ -121,6 +119,50 @@ class SemanticVersionTest extends BiopetTest {
     SemanticVersion(1, 1, 1) <= SemanticVersion(2, 1, 1) shouldBe true
     SemanticVersion(1, 1, 1) <= SemanticVersion(1, 2, 1) shouldBe true
     SemanticVersion(1, 1, 1) <= SemanticVersion(1, 1, 2) shouldBe true
+  }
+  @Test
+  def testBigVersionComparisons(): Unit = {
+    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 200, 2) shouldBe false
+    SemanticVersion(3000, 231, 123) >= SemanticVersion(2991, 3231, 432) shouldBe true
+  }
+  @Test
+  def testSort(): Unit = {
+    val versions = Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha", "0.8.0-beta")
+    val sortedVersions = versions.sortBy(version =>
+      fromString(version) match {
+        case Some(semVer) => semVer
+        case _            => new SemanticVersion(0, 0, 0)
+    })
+    sortedVersions shouldBe Seq("0.8.0-alpha",
+                                "0.8.0-beta",
+                                "0.8.0",
+                                "v1.0.3",
+                                "2.3.3")
+  }
+
+  def testBigVersionSort(): Unit = {
+    // Exceeding Int.MaxValue for the love of it.
+    val versions = Seq(
+      "v1100.231.41",
+      s"${Int.MaxValue + 20}.1.1",
+      s"${Int.MaxValue + 10}.123.3-ZZx4",
+      s"${Int.MaxValue + 10}.123.3-ZZx5",
+      "2.82312123213.31231-XYZbladsa",
+      "2.97567567565445.321-beta"
+    )
+    val sortedVersions = versions.sortBy(version =>
+      fromString(version) match {
+        case Some(semVer) => semVer
+        case _            => new SemanticVersion(0, 0, 0)
+    })
+    sortedVersions shouldBe Seq(
+      "2.82312123213.31231-XYZbladsa",
+      "2.97567567565445.321-beta",
+      "v1100.231.41",
+      s"${Int.MaxValue + 10}.123.3-ZZx4",
+      s"${Int.MaxValue + 10}.123.3-ZZx5",
+      s"${Int.MaxValue + 20}.1.1"
+    )
   }
 
 }
