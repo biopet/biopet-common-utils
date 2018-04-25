@@ -32,9 +32,6 @@ case class SemanticVersion(major: Int,
                            build: Option[String] = None)
     extends Ordered[SemanticVersion] {
 
-  // buildClass is only used for comparison purposes.
-  val buildClass: Build = Build(build.getOrElse(""))
-
   def ==(that: SemanticVersion): Boolean = {
     this.major == that.major &&
     this.minor == that.minor &&
@@ -42,8 +39,26 @@ case class SemanticVersion(major: Int,
     this.build == that.build
   }
 
+  /**
+    * Checks whether one version is later than another.
+    * Versions without builds (no -alpha, -SNAPSHOT or -build123)
+    * are assumed to be later than versions with builds.
+    * Example 0.8.0-alpha < 0.8.0-beta < 0.8.0
+    * @param that
+    * @return
+    */
   def compare(that: SemanticVersion): Int = {
-    (this.major, this.minor, this.patch, this.buildClass) compare (that.major, that.minor, that.patch, that.buildClass)
+    val versionCompare = (this.major, this.minor, this.patch) compare (that.major, that.minor, that.patch)
+    if (versionCompare == 0) {
+      // Empty builds should always be greatest.
+      // Example 0.8.0-alpha < 0.8.0 and 1.0.2-SNAPSHOT < 1.0.2
+      (this.build, that.build) match {
+        case (Some(_), None)    => -1
+        case (None, Some(_))    => +1
+        case (Some(a), Some(b)) => a compare b
+        case _                  => 0
+      }
+    } else versionCompare
   }
 }
 
@@ -76,5 +91,4 @@ object SemanticVersion {
       case _ => None
     }
   }
-
 }
