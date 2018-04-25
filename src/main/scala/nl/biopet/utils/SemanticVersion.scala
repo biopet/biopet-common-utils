@@ -33,10 +33,7 @@ case class SemanticVersion(major: Int,
     extends Ordered[SemanticVersion] {
 
   // buildClass is only used for comparison purposes.
-  val buildClass: Build = build match {
-    case Some(string) => Build(string)
-    case _            => Build("")
-  }
+  val buildClass: Build = Build(build.getOrElse(""))
 
   def ==(that: SemanticVersion): Boolean = {
     this.major == that.major &&
