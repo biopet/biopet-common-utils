@@ -42,7 +42,7 @@ pipeline {
     }
     post {
         always {
-            //sh "touch test-output/junitreports/*.xml"
+            sh "touch target/test-reports/*.xml"
             junit 'target/test-reports/*.xml'
         }
         failure {
