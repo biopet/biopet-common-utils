@@ -27,8 +27,8 @@ import scala.util.matching.Regex
   * Created by pjvanthof on 29/04/2017.
   */
 case class SemanticVersion(major: Int,
-                           minor: Option[Int],
-                           patch: Option[Int],
+                           minor: Option[Int] = None,
+                           patch: Option[Int] = None,
                            build: Option[String] = None)
     extends Ordered[SemanticVersion] {
 
@@ -63,7 +63,7 @@ case class SemanticVersion(major: Int,
 }
 
 object SemanticVersion {
-  val semanticVersionRegex: Regex = "[vV]?(\\d+)\\.(\\d+)\\.(\\d+)(-.*)?".r
+  val semanticVersionRegex: Regex = "[vV]?(\\d+)\\.?(\\d+)\\.?(\\d+)(-.*)?".r
 
   /**
     * Check whether a version string is a semantic version.
@@ -85,8 +85,8 @@ object SemanticVersion {
       case semanticVersionRegex(major, minor, patch, build) =>
         Some(
           SemanticVersion(major.toInt,
-                          minor.toInt,
-                          patch.toInt,
+                          Some(minor.toInt),
+                          Some(patch.toInt),
                           Option(build).map(x => x.stripPrefix("-"))))
       case _ => None
     }
