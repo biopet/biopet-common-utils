@@ -27,8 +27,8 @@ import scala.util.matching.Regex
   * Created by pjvanthof on 29/04/2017.
   */
 case class SemanticVersion(major: Int,
-                           minor: Int,
-                           patch: Int,
+                           minor: Option[Int],
+                           patch: Option[Int],
                            build: Option[String] = None)
     extends Ordered[SemanticVersion] {
 
