@@ -117,7 +117,7 @@ class DocumentationTest extends BiopetTest {
   @Test
   def testMarkdownExtractChapter(): Unit = {
     val markdown: String = Source
-      .fromResource("test.md")
+      .fromFile(resourceFile("/test.md"))
       .getLines()
       .mkString("\n")
     val n = lineSeparator
