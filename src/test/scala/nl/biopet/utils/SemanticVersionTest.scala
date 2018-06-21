@@ -93,6 +93,13 @@ class SemanticVersionTest extends BiopetTest {
   }
 
   @Test
+  def testMixedDigits(): Unit = {
+    fromString("2") > fromString("1.1") shouldBe true
+    fromString("1.1") < fromString("1.1.1") shouldBe true
+    fromString("1.1-SNAPSHOT") < fromString("1.1") shouldBe true
+  }
+
+  @Test
   def testLesserThen(): Unit = {
     SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 1) shouldBe false
     SemanticVersion(1, 1, 1) < SemanticVersion(0, 1, 1) shouldBe false
@@ -101,6 +108,7 @@ class SemanticVersionTest extends BiopetTest {
     SemanticVersion(1, 1, 1) < SemanticVersion(2, 1, 1) shouldBe true
     SemanticVersion(1, 1, 1) < SemanticVersion(1, 2, 1) shouldBe true
     SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 2) shouldBe true
+    SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 1, Some("SNAP")) shouldBe true
   }
 
   @Test
