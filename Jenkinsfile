@@ -42,6 +42,7 @@ pipeline {
     }
     post {
         always {
+            sh "touch test-output/junitreports/*.xml"
             junit '**/test-output/junitreports/*.xml'
         }
         failure {
