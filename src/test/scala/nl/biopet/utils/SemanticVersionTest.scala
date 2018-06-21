@@ -36,10 +36,14 @@ class SemanticVersionTest extends BiopetTest {
   val semanticVersionWith2 = "V1.2"
   val semanticVersionWith2AndBuild = "v1.2-SNAPSHOT"
   val semanticVersionWithBuild = "1.2.3-alpha0.1"
-  val nonSemanticVersion = "v1222.1"
+  val nonSemanticVersion = "dasd.wje29.ds"
+
   @Test
   def testIsSemantic(): Unit = {
     canParse(semanticVersion) shouldBe true
+    canParse(semanticVersionWith1) shouldBe true
+    canParse(semanticVersionWith2) shouldBe true
+    canParse(semanticVersionWith2AndBuild) shouldBe true
     canParse(semanticVersionWithBuild) shouldBe true
     canParse(nonSemanticVersion) shouldBe false
   }

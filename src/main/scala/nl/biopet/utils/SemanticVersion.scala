@@ -63,7 +63,7 @@ case class SemanticVersion(major: Int,
 }
 
 object SemanticVersion {
-  val semanticVersionRegex: Regex = "[vV]?(\\d+)\\.?(\\d+)\\.?(\\d+)(-.*)?".r
+  val semanticVersionRegex: Regex = "^[vV]?(\\d+)(\\.\\d+)?(\\.\\d+)?(-.*)?".r
 
   /**
     * Check whether a version string is a semantic version.
@@ -72,6 +72,13 @@ object SemanticVersion {
     * @return boolean
     */
   def canParse(version: String): Boolean = fromString(version).isDefined
+
+  def digitToOptionInt(digit: String): Option[Int] = {
+    digit match {
+      case "" => None
+      case _ => Some(digit.toInt)
+    }
+  }
 
   /**
     * Check whether a version string is a semantic version.
@@ -85,8 +92,8 @@ object SemanticVersion {
       case semanticVersionRegex(major, minor, patch, build) =>
         Some(
           SemanticVersion(major.toInt,
-                          Some(minor.toInt),
-                          Some(patch.toInt),
+            digitToOptionInt(minor.stripPrefix("\\.")),
+                          digitToOptionInt(patch.stripPrefix("\\.")),
                           Option(build).map(x => x.stripPrefix("-"))))
       case _ => None
     }
