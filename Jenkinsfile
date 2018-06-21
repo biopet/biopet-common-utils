@@ -42,8 +42,8 @@ pipeline {
     }
     post {
         always {
-            sh "touch test-output/junitreports/*.xml"
-            junit '**/test-output/junitreports/*.xml'
+            //sh "touch test-output/junitreports/*.xml"
+            junit 'target/test-reports/*.xml'
         }
         failure {
             slackSend(color: '#FF0000', message: "Failure: Job '${env.JOB_NAME} #${env.BUILD_NUMBER}' (<${env.BUILD_URL}|Open>)", channel: '#biopet-bot', teamDomain: 'lumc', tokenCredentialId: 'lumc')
