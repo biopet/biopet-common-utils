@@ -32,11 +32,11 @@ import org.testng.annotations.Test
 class SemanticVersionTest extends BiopetTest {
 
   val semanticVersion = "1.2.3"
-  val semanticVersionWith1 = "v1.2.3"
-  val semanticVersionWith2 = "V1.2.3"
+  val semanticVersionWith1 = "v1"
+  val semanticVersionWith2 = "V1.2"
+  val semanticVersionWith2AndBuild = "v1.2-SNAPSHOT"
   val semanticVersionWithBuild = "1.2.3-alpha0.1"
   val nonSemanticVersion = "v1222.1"
-
   @Test
   def testIsSemantic(): Unit = {
     canParse(semanticVersion) shouldBe true
@@ -49,6 +49,7 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWith1).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWith2).map(_.major) shouldBe Some(1)
+    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWithBuild).map(_.major) shouldBe Some(1)
   }
 
@@ -57,6 +58,7 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).map(_.minor) shouldBe Some(2)
     fromString(semanticVersionWith1).map(_.minor) shouldBe Some(2)
     fromString(semanticVersionWith2).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe Some(2)
     fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(2)
   }
 
@@ -65,6 +67,7 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).map(_.patch) shouldBe Some(3)
     fromString(semanticVersionWith1).map(_.patch) shouldBe Some(3)
     fromString(semanticVersionWith2).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe None
     fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(3)
   }
 
@@ -73,6 +76,7 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith1).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith2).flatMap(_.build) shouldBe None
+    fromString(semanticVersionWith2AndBuild).flatMap(_.build) shouldBe Some("SNAPSHOT")
     fromString(semanticVersionWithBuild).flatMap(_.build) shouldBe Some(
       "alpha0.1")
   }
