@@ -26,12 +26,14 @@ import org.testng.annotations.Test
 import java.io.File
 
 import scala.io.Source
+import scala.util.Properties.lineSeparator
+import Documentation._
 
 class DocumentationTest extends BiopetTest {
   @Test
   def testTableMethod(): Unit = {
     the[java.lang.IllegalArgumentException] thrownBy {
-      Documentation.htmlTable(
+      htmlTable(
         List("Column1", "Column2"),
         List(
           List("1", "2"),
@@ -39,9 +41,8 @@ class DocumentationTest extends BiopetTest {
         )
       )
     } should have message "requirement failed: Number of items in each row should be equal number of items in header."
-    val table: String = Documentation.htmlTable(
-      List("Column1", "Column2"),
-      List(List("1", "2"), List("a", "b")))
+    val table: String = htmlTable(List("Column1", "Column2"),
+                                  List(List("1", "2"), List("a", "b")))
     table should contain
     """<table>
       |  <thead>
@@ -67,7 +68,7 @@ class DocumentationTest extends BiopetTest {
   @Test
   def testContentToFile(): Unit = {
     val testMd = File.createTempFile("test.", ".md")
-    Documentation.contentsToMarkdown(
+    contentsToMarkdown(
       List(
         ("# Test", "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
       ),
@@ -81,10 +82,10 @@ class DocumentationTest extends BiopetTest {
   @Test
   def testHtmlRedirector(): Unit = {
     val testRedirect = File.createTempFile("test.", ".html")
-    Documentation.htmlRedirector(outputFile = testRedirect,
-                                 link = "bla/index.html",
-                                 title = "Project X",
-                                 redirectText = "Click here for X")
+    htmlRedirector(outputFile = testRedirect,
+                   link = "bla/index.html",
+                   title = "Project X",
+                   redirectText = "Click here for X")
 
     testRedirect should exist
     val reader = Source.fromFile(testRedirect)
@@ -111,5 +112,58 @@ class DocumentationTest extends BiopetTest {
       |</a>
       |</body>
       |</html>""".stripMargin
+  }
+
+  @Test
+  def testMarkdownExtractChapter(): Unit = {
+    val markdown: String = Source
+      .fromResource("test.md")
+      .getLines()
+      .mkString("\n")
+    val n = lineSeparator
+    markdownExtractChapter(markdown, "Onedotone") shouldBe """## Onedotone
+                                                             |1.1
+                                                             |
+                                                             |### Onedotonedotone
+                                                             |1.1.1
+                                                             |""".stripMargin
+    markdownExtractChapter(markdown, "One") shouldBe
+      """# One
+        |1
+        |
+        |## Onedotone
+        |1.1
+        |
+        |### Onedotonedotone
+        |1.1.1
+        |
+        |## Onedottwo
+        |1.2
+        |
+        |## Onedotthree
+        |1.3
+        |
+        |## Onedotfour
+        |1.4
+        |""".stripMargin
+    markdownExtractChapter(markdown, "Onedotonedotone") shouldBe
+      """### Onedotonedotone
+        |1.1.1
+        |""".stripMargin
+    markdownExtractChapter(markdown, "Onedotonedotone", includeHeader = false) shouldBe
+      """|1.1.1
+         |""".stripMargin
+  }
+  @Test
+  def testSplitStringList(): Unit = {
+    val a = List("a", "ab", "bc", "ac")
+    splitStringList(a, x => x.startsWith("a")) shouldBe List(List("a"),
+                                                             List("ab", "bc"),
+                                                             List("ac"))
+    val b = List("c", "c", "a", "ab", "bc", "ac")
+    splitStringList(b, x => x.startsWith("a")) shouldBe List(List("c", "c"),
+                                                             List("a"),
+                                                             List("ab", "bc"),
+                                                             List("ac"))
   }
 }
