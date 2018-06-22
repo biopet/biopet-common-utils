@@ -87,7 +87,22 @@ class SemanticVersionTest extends BiopetTest {
   }
 
   @Test
+  def testEquals(): Unit = {
+    new SemanticVersion(1) == new SemanticVersion(1) shouldBe true
+    new SemanticVersion(1,Some(1)) == new SemanticVersion(1, Some(1)) shouldBe true
+    new SemanticVersion(1,Some(1),Some(1)) == new SemanticVersion(1,Some(1),Some(1)) shouldBe true
+    new SemanticVersion(1,build = Some("SNAPSHOT")) == new SemanticVersion(1,build = Some("SNAPSHOT")) shouldBe true
+
+    new SemanticVersion(2) == new SemanticVersion(1) shouldBe false
+    new SemanticVersion(1,Some(2)) == new SemanticVersion(1, Some(1)) shouldBe false
+    new SemanticVersion(1,Some(1),Some(2)) == new SemanticVersion(1,Some(1),Some(1)) shouldBe false
+    new SemanticVersion(1,build = Some("alpha")) == new SemanticVersion(1,build = Some("SNAPSHOT")) shouldBe false
+
+  }
+  @Test
   def testGreaterThen(): Unit = {
+    fromString("1.1") > (fromString("1")) shouldBe true
+    fromString("1.0") > fromString("1.0.3") shouldBe false
     fromString("1.1.1") > fromString("1.1.1") shouldBe false
     fromString("1.1.1") > fromString("0.1.1") shouldBe true
     fromString("1.1.1") > fromString("1.0.1") shouldBe true
