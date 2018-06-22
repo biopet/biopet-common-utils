@@ -20,6 +20,7 @@
  */
 
 package nl.biopet.utils
+import scala.math.Ordered.orderingToOrdered
 import scala.util.matching.Regex
 
 /**
@@ -39,52 +40,29 @@ case class SemanticVersion(major: Int,
   }
 
   /**
-    * Compare two Option[Int] values.
-    * @param x an Option[Int]
-    * @param y the other Option[Int]
-    * @return Comparator Int.
-    */
-  def compareOptionInt(x: Option[Int], y: Option[Int]): Int = {
-    (x, y) match {
-      case (Some(_), None)    => +1 //Some(number) is always better than None
-      case (None, Some(_))    => -1
-      case (Some(a), Some(b)) => a compare b
-      case (None, None)       => 0
-      case _ =>
-        throw new IllegalStateException(s"Unable to compare '$x' and '$y'")
-    }
-  }
-
-  /**
     * Checks whether one version is later than another.
     * Versions without builds (no -alpha, -SNAPSHOT or -build123)
     * are assumed to be later than versions with builds.
     * Example 0.8.0-alpha < 0.8.0-beta < 0.8.0
-    * @param that another SemanticVersion
-    * @return Comparator int
+    * @param that
+    * @return
     */
   def compare(that: SemanticVersion): Int = {
-    val majorCompare = this.major compare that.major
-    if (majorCompare != 0) majorCompare
-    else {
-      val minorCompare = compareOptionInt(this.minor, that.minor)
-      if (minorCompare != 0) minorCompare
-      else {
-        val patchCompare = compareOptionInt(this.patch, that.patch)
-        if (patchCompare != 0) patchCompare
-        else {
-          (this.build, that.build) match {
-            case (Some(_), None)    => -1 //No build is greater than a build.
-            case (None, Some(_))    => +1 // 1.0 > 1.0-alpha
-            case (Some(a), Some(b)) => a compare b
-            case (None, None)       => 0
-            case _ =>
-              throw new IllegalStateException(
-                s"Unable to compare '${this.build}' and '${that.build}'")
-          }
-        }
+    val versionCompare = (this.major,
+                          this.minor.getOrElse(0),
+                          this.patch
+                            .getOrElse(0)) compare (that.major, that.minor
+      .getOrElse(0), that.patch.getOrElse(0))
+    if (versionCompare == 0) {
+      // Empty builds should always be greatest.
+      // Example 0.8.0-alpha < 0.8.0 and 1.0.2-SNAPSHOT < 1.0.2
+      (this.build, that.build) match {
+        case (Some(_), None)    => -1
+        case (None, Some(_))    => +1
+        case (Some(a), Some(b)) => a compare b
+        case _                  => 0
       }
-    }
+    } else versionCompare
   }
 
 }
