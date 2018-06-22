@@ -59,20 +59,20 @@ class SemanticVersionTest extends BiopetTest {
 
   @Test
   def testMinorVersion(): Unit = {
-    fromString(semanticVersion).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWith1).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWith2).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe Some(2)
-    fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersion).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWith1).map(_.minor) shouldBe Some(None)
+    fromString(semanticVersionWith2).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWith2AndBuild).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(Some(2))
   }
 
   @Test
   def testPatchVersion(): Unit = {
-    fromString(semanticVersion).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWith1).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWith2).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe None
-    fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersion).map(_.patch) shouldBe Some(Some(3))
+    fromString(semanticVersionWith1).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWith2).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWith2AndBuild).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(Some(3))
   }
 
   @Test
@@ -113,7 +113,7 @@ class SemanticVersionTest extends BiopetTest {
     fromString("1.1.1") < fromString("2.1.1") shouldBe true
     fromString("1.1.1") < fromString("1.2.1") shouldBe true
     fromString("1.1.1") < fromString("1.1.2") shouldBe true
-    fromString("1.1.1") < fromString("1.1.1-SNAPSHOT") shouldBe true
+    fromString("1.1.1") < fromString("1.1.1-SNAPSHOT") shouldBe false
   }
 
   @Test
@@ -158,7 +158,7 @@ class SemanticVersionTest extends BiopetTest {
                                 "0.8.0",
                                 "v1.0.3",
                                 "2.3.3",
-                                "3.0")
+                                "v3.0")
   }
 
   def testBigVersionSort(): Unit = {
