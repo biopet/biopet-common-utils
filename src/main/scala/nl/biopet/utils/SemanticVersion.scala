@@ -73,13 +73,6 @@ object SemanticVersion {
     */
   def canParse(version: String): Boolean = fromString(version).isDefined
 
-  def digitToOptionInt(digit: String): Option[Int] = {
-    digit match {
-      case "" => None
-      case _ => Some(digit.toInt)
-    }
-  }
-
   /**
     * Check whether a version string is a semantic version.
     * Note: the toInt calls here are only safe because the regex only matches numbers
@@ -92,9 +85,10 @@ object SemanticVersion {
       case semanticVersionRegex(major, minor, patch, build) =>
         Some(
           SemanticVersion(major.toInt,
-            digitToOptionInt(minor.stripPrefix("\\.")),
-                          digitToOptionInt(patch.stripPrefix("\\.")),
-                          Option(build).map(x => x.stripPrefix("-"))))
+                          Option(minor).map(x => x.stripPrefix(".").toInt),
+                          Option(patch).map(x => x.stripPrefix(".").toInt),
+                          Option(build).map(x => x.stripPrefix("-")))
+        )
       case _ => None
     }
   }

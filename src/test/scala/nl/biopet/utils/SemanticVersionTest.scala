@@ -80,7 +80,8 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith1).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith2).flatMap(_.build) shouldBe None
-    fromString(semanticVersionWith2AndBuild).flatMap(_.build) shouldBe Some("SNAPSHOT")
+    fromString(semanticVersionWith2AndBuild).flatMap(_.build) shouldBe Some(
+      "SNAPSHOT")
     fromString(semanticVersionWithBuild).flatMap(_.build) shouldBe Some(
       "alpha0.1")
   }
@@ -143,18 +144,21 @@ class SemanticVersionTest extends BiopetTest {
   }
   @Test
   def testSort(): Unit = {
-    val versions = Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha","v3.0", "0.8.0-beta")
+    val versions =
+      Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha", "v3.0", "0.8.0-beta")
     val sortedVersions = versions.sortBy(version =>
       fromString(version) match {
         case Some(semVer) => semVer
-        case _            => new SemanticVersion(0)
+        case _ =>
+          throw new IllegalStateException(
+            "Test numbers should be parsable by semver.")
     })
     sortedVersions shouldBe Seq("0.8.0-alpha",
                                 "0.8.0-beta",
                                 "0.8.0",
                                 "v1.0.3",
                                 "2.3.3",
-    "3.0")
+                                "3.0")
   }
 
   def testBigVersionSort(): Unit = {
@@ -170,7 +174,9 @@ class SemanticVersionTest extends BiopetTest {
     val sortedVersions = versions.sortBy(version =>
       fromString(version) match {
         case Some(semVer) => semVer
-        case _            => new SemanticVersion(0)
+        case _ =>
+          throw new IllegalStateException(
+            "Test numbers should be parsable by semver.")
     })
     sortedVersions shouldBe Seq(
       "2.82312123213.31231-XYZbladsa",
@@ -181,5 +187,4 @@ class SemanticVersionTest extends BiopetTest {
       s"${Int.MaxValue + 20}.1.1"
     )
   }
-
 }
