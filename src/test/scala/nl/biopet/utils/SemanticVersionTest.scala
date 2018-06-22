@@ -111,7 +111,7 @@ class SemanticVersionTest extends BiopetTest {
   }
   @Test
   def testGreaterThen(): Unit = {
-    fromString("1.1") > (fromString("1")) shouldBe true
+    fromString("1.1") > fromString("1") shouldBe true
     fromString("1.0") > fromString("1.0.3") shouldBe false
     fromString("1.1.1") > fromString("1.1.1") shouldBe false
     fromString("1.1.1") > fromString("0.1.1") shouldBe true
