@@ -32,14 +32,18 @@ import org.testng.annotations.Test
 class SemanticVersionTest extends BiopetTest {
 
   val semanticVersion = "1.2.3"
-  val semanticVersionWith1 = "v1.2.3"
-  val semanticVersionWith2 = "V1.2.3"
+  val semanticVersionWith1 = "v1"
+  val semanticVersionWith2 = "V1.2"
+  val semanticVersionWith2AndBuild = "v1.2-SNAPSHOT"
   val semanticVersionWithBuild = "1.2.3-alpha0.1"
-  val nonSemanticVersion = "v1222.1"
+  val nonSemanticVersion = "dasd.wje29.ds"
 
   @Test
   def testIsSemantic(): Unit = {
     canParse(semanticVersion) shouldBe true
+    canParse(semanticVersionWith1) shouldBe true
+    canParse(semanticVersionWith2) shouldBe true
+    canParse(semanticVersionWith2AndBuild) shouldBe true
     canParse(semanticVersionWithBuild) shouldBe true
     canParse(nonSemanticVersion) shouldBe false
   }
@@ -49,23 +53,26 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWith1).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWith2).map(_.major) shouldBe Some(1)
+    fromString(semanticVersionWith2AndBuild).map(_.major) shouldBe Some(1)
     fromString(semanticVersionWithBuild).map(_.major) shouldBe Some(1)
   }
 
   @Test
   def testMinorVersion(): Unit = {
-    fromString(semanticVersion).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWith1).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWith2).map(_.minor) shouldBe Some(2)
-    fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(2)
+    fromString(semanticVersion).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWith1).map(_.minor) shouldBe Some(None)
+    fromString(semanticVersionWith2).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWith2AndBuild).map(_.minor) shouldBe Some(Some(2))
+    fromString(semanticVersionWithBuild).map(_.minor) shouldBe Some(Some(2))
   }
 
   @Test
   def testPatchVersion(): Unit = {
-    fromString(semanticVersion).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWith1).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWith2).map(_.patch) shouldBe Some(3)
-    fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(3)
+    fromString(semanticVersion).map(_.patch) shouldBe Some(Some(3))
+    fromString(semanticVersionWith1).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWith2).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWith2AndBuild).map(_.patch) shouldBe Some(None)
+    fromString(semanticVersionWithBuild).map(_.patch) shouldBe Some(Some(3))
   }
 
   @Test
@@ -73,71 +80,110 @@ class SemanticVersionTest extends BiopetTest {
     fromString(semanticVersion).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith1).flatMap(_.build) shouldBe None
     fromString(semanticVersionWith2).flatMap(_.build) shouldBe None
+    fromString(semanticVersionWith2AndBuild).flatMap(_.build) shouldBe Some(
+      "SNAPSHOT")
     fromString(semanticVersionWithBuild).flatMap(_.build) shouldBe Some(
       "alpha0.1")
   }
 
   @Test
+  def testEquals(): Unit = {
+    new SemanticVersion(1) == new SemanticVersion(1) shouldBe true
+    new SemanticVersion(1, Some(1)) == new SemanticVersion(1, Some(1)) shouldBe true
+    new SemanticVersion(1, Some(1), Some(1)) == new SemanticVersion(
+      1,
+      Some(1),
+      Some(1)) shouldBe true
+    new SemanticVersion(1, build = Some("SNAPSHOT")) == new SemanticVersion(
+      1,
+      build = Some("SNAPSHOT")) shouldBe true
+
+    new SemanticVersion(2) == new SemanticVersion(1) shouldBe false
+    new SemanticVersion(1, Some(2)) == new SemanticVersion(1, Some(1)) shouldBe false
+    new SemanticVersion(1, Some(1), Some(2)) == new SemanticVersion(
+      1,
+      Some(1),
+      Some(1)) shouldBe false
+    new SemanticVersion(1, build = Some("alpha")) == new SemanticVersion(
+      1,
+      build = Some("SNAPSHOT")) shouldBe false
+
+  }
+  @Test
   def testGreaterThen(): Unit = {
-    SemanticVersion(1, 1, 1) > SemanticVersion(1, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) > SemanticVersion(0, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) > SemanticVersion(1, 0, 1) shouldBe true
-    SemanticVersion(1, 1, 1) > SemanticVersion(1, 1, 0) shouldBe true
-    SemanticVersion(1, 1, 1) > SemanticVersion(2, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) > SemanticVersion(1, 2, 1) shouldBe false
-    SemanticVersion(1, 1, 1) > SemanticVersion(1, 1, 2) shouldBe false
+    fromString("1.1") > fromString("1") shouldBe true
+    fromString("1.0") > fromString("1.0.3") shouldBe false
+    fromString("1.1.1") > fromString("1.1.1") shouldBe false
+    fromString("1.1.1") > fromString("0.1.1") shouldBe true
+    fromString("1.1.1") > fromString("1.0.1") shouldBe true
+    fromString("1.1.1") > fromString("1.1.0") shouldBe true
+    fromString("1.1.1") > fromString("2.1.1") shouldBe false
+    fromString("1.1.1") > fromString("1.2.1") shouldBe false
+    fromString("1.1.1") > fromString("1.1.2") shouldBe false
+  }
+
+  @Test
+  def testMixedDigits(): Unit = {
+    fromString("2") > fromString("1.1") shouldBe true
+    fromString("1.1") < fromString("1.1.1") shouldBe true
+    fromString("1.1-SNAPSHOT") < fromString("1.1") shouldBe true
   }
 
   @Test
   def testLesserThen(): Unit = {
-    SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) < SemanticVersion(0, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) < SemanticVersion(1, 0, 1) shouldBe false
-    SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 0) shouldBe false
-    SemanticVersion(1, 1, 1) < SemanticVersion(2, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) < SemanticVersion(1, 2, 1) shouldBe true
-    SemanticVersion(1, 1, 1) < SemanticVersion(1, 1, 2) shouldBe true
+    fromString("1.1.1") < fromString("1.1.1") shouldBe false
+    fromString("1.1.1") < fromString("0.1.1") shouldBe false
+    fromString("1.1.1") < fromString("1.0.1") shouldBe false
+    fromString("1.1.1") < fromString("1.1.0") shouldBe false
+    fromString("1.1.1") < fromString("2.1.1") shouldBe true
+    fromString("1.1.1") < fromString("1.2.1") shouldBe true
+    fromString("1.1.1") < fromString("1.1.2") shouldBe true
+    fromString("1.1.1") < fromString("1.1.1-SNAPSHOT") shouldBe false
   }
 
   @Test
   def testGreaterThenOrEqual(): Unit = {
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) >= SemanticVersion(0, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 0, 1) shouldBe true
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 1, 0) shouldBe true
-    SemanticVersion(1, 1, 1) >= SemanticVersion(2, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 2, 1) shouldBe false
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 1, 2) shouldBe false
+    fromString("1.1.1") >= fromString("1.1.1") shouldBe true
+    fromString("1.1.1") >= fromString("0.1.1") shouldBe true
+    fromString("1.1.1") >= fromString("1.0.1") shouldBe true
+    fromString("1.1.1") >= fromString("1.1.0") shouldBe true
+    fromString("1.1.1") >= fromString("2.1.1") shouldBe false
+    fromString("1.1.1") >= fromString("1.2.1") shouldBe false
+    fromString("1.1.1") >= fromString("1.1.2") shouldBe false
   }
 
   @Test
   def testLesserThenOrEqual(): Unit = {
-    SemanticVersion(1, 1, 1) <= SemanticVersion(1, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) <= SemanticVersion(0, 1, 1) shouldBe false
-    SemanticVersion(1, 1, 1) <= SemanticVersion(1, 0, 1) shouldBe false
-    SemanticVersion(1, 1, 1) <= SemanticVersion(1, 1, 0) shouldBe false
-    SemanticVersion(1, 1, 1) <= SemanticVersion(2, 1, 1) shouldBe true
-    SemanticVersion(1, 1, 1) <= SemanticVersion(1, 2, 1) shouldBe true
-    SemanticVersion(1, 1, 1) <= SemanticVersion(1, 1, 2) shouldBe true
+    fromString("1.1.1") <= fromString("1.1.1") shouldBe true
+    fromString("1.1.1") <= fromString("0.1.1") shouldBe false
+    fromString("1.1.1") <= fromString("1.0.1") shouldBe false
+    fromString("1.1.1") <= fromString("1.1.0") shouldBe false
+    fromString("1.1.1") <= fromString("2.1.1") shouldBe true
+    fromString("1.1.1") <= fromString("1.2.1") shouldBe true
+    fromString("1.1.1") <= fromString("1.1.2") shouldBe true
   }
   @Test
   def testBigVersionComparisons(): Unit = {
-    SemanticVersion(1, 1, 1) >= SemanticVersion(1, 200, 2) shouldBe false
-    SemanticVersion(3000, 231, 123) >= SemanticVersion(2991, 3231, 432) shouldBe true
+    fromString("1.1.1") >= fromString("1.200.2") shouldBe false
+    fromString("3000.231.123") >= fromString("2991.3231.432") shouldBe true
   }
   @Test
   def testSort(): Unit = {
-    val versions = Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha", "0.8.0-beta")
+    val versions =
+      Seq("v1.0.3", "2.3.3", "0.8.0", "0.8.0-alpha", "v3.0", "0.8.0-beta")
     val sortedVersions = versions.sortBy(version =>
       fromString(version) match {
         case Some(semVer) => semVer
-        case _            => new SemanticVersion(0, 0, 0)
+        case _ =>
+          throw new IllegalStateException(
+            "Test numbers should be parsable by semver.")
     })
     sortedVersions shouldBe Seq("0.8.0-alpha",
                                 "0.8.0-beta",
                                 "0.8.0",
                                 "v1.0.3",
-                                "2.3.3")
+                                "2.3.3",
+                                "v3.0")
   }
 
   def testBigVersionSort(): Unit = {
@@ -153,7 +199,9 @@ class SemanticVersionTest extends BiopetTest {
     val sortedVersions = versions.sortBy(version =>
       fromString(version) match {
         case Some(semVer) => semVer
-        case _            => new SemanticVersion(0, 0, 0)
+        case _ =>
+          throw new IllegalStateException(
+            "Test numbers should be parsable by semver.")
     })
     sortedVersions shouldBe Seq(
       "2.82312123213.31231-XYZbladsa",
@@ -164,5 +212,4 @@ class SemanticVersionTest extends BiopetTest {
       s"${Int.MaxValue + 20}.1.1"
     )
   }
-
 }

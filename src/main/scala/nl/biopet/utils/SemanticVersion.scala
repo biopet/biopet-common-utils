@@ -27,8 +27,8 @@ import scala.util.matching.Regex
   * Created by pjvanthof on 29/04/2017.
   */
 case class SemanticVersion(major: Int,
-                           minor: Int,
-                           patch: Int,
+                           minor: Option[Int] = None,
+                           patch: Option[Int] = None,
                            build: Option[String] = None)
     extends Ordered[SemanticVersion] {
 
@@ -48,7 +48,11 @@ case class SemanticVersion(major: Int,
     * @return
     */
   def compare(that: SemanticVersion): Int = {
-    val versionCompare = (this.major, this.minor, this.patch) compare (that.major, that.minor, that.patch)
+    val versionCompare = (this.major,
+                          this.minor.getOrElse(0),
+                          this.patch
+                            .getOrElse(0)) compare (that.major, that.minor
+      .getOrElse(0), that.patch.getOrElse(0))
     if (versionCompare == 0) {
       // Empty builds should always be greatest.
       // Example 0.8.0-alpha < 0.8.0 and 1.0.2-SNAPSHOT < 1.0.2
@@ -60,10 +64,11 @@ case class SemanticVersion(major: Int,
       }
     } else versionCompare
   }
+
 }
 
 object SemanticVersion {
-  val semanticVersionRegex: Regex = "[vV]?(\\d+)\\.(\\d+)\\.(\\d+)(-.*)?".r
+  val semanticVersionRegex: Regex = "^[vV]?(\\d+)(\\.\\d+)?(\\.\\d+)?(-.*)?".r
 
   /**
     * Check whether a version string is a semantic version.
@@ -85,9 +90,10 @@ object SemanticVersion {
       case semanticVersionRegex(major, minor, patch, build) =>
         Some(
           SemanticVersion(major.toInt,
-                          minor.toInt,
-                          patch.toInt,
-                          Option(build).map(x => x.stripPrefix("-"))))
+                          Option(minor).map(x => x.stripPrefix(".").toInt),
+                          Option(patch).map(x => x.stripPrefix(".").toInt),
+                          Option(build).map(x => x.stripPrefix("-")))
+        )
       case _ => None
     }
   }
