@@ -20,7 +20,6 @@
  */
 
 package nl.biopet.utils
-import scala.math.Ordered.orderingToOrdered
 import scala.util.matching.Regex
 
 /**
@@ -39,6 +38,12 @@ case class SemanticVersion(major: Int,
     this.build == that.build
   }
 
+  /**
+    * Compare two Option[Int] values.
+    * @param x an Option[Int]
+    * @param y the other Option[Int]
+    * @return Comparator Int.
+    */
   def compareOptionInt(x: Option[Int], y: Option[Int]): Int = {
     (x, y) match {
       case (Some(_), None)    => +1 //Some(number) is always better than None
@@ -55,8 +60,8 @@ case class SemanticVersion(major: Int,
     * Versions without builds (no -alpha, -SNAPSHOT or -build123)
     * are assumed to be later than versions with builds.
     * Example 0.8.0-alpha < 0.8.0-beta < 0.8.0
-    * @param that
-    * @return
+    * @param that another SemanticVersion
+    * @return Comparator int
     */
   def compare(that: SemanticVersion): Int = {
     val majorCompare = this.major compare that.major
