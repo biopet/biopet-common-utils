@@ -47,7 +47,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SemanticVersion</span><span class="params">(<span name="major">major: <span class="extype" name="scala.Int">Int</span></span>, <span name="minor">minor: <span class="extype" name="scala.Int">Int</span></span>, <span name="patch">patch: <span class="extype" name="scala.Int">Int</span></span>, <span name="build">build: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Ordered">Ordered</span>[<a href="" class="extype" name="nl.biopet.utils.SemanticVersion">SemanticVersion</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">SemanticVersion</span><span class="params">(<span name="major">major: <span class="extype" name="scala.Int">Int</span></span>, <span name="minor">minor: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="patch">patch: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="build">build: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Ordered">Ordered</span>[<a href="" class="extype" name="nl.biopet.utils.SemanticVersion">SemanticVersion</a>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -92,7 +92,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="nl.biopet.utils.SemanticVersion#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(major:Int,minor:Int,patch:Int,build:Option[String]):nl.biopet.utils.SemanticVersion"></a>
+      <a id="&lt;init&gt;(major:Int,minor:Option[Int],patch:Option[Int],build:Option[String]):nl.biopet.utils.SemanticVersion"></a>
       <a id="&lt;init&gt;:SemanticVersion"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -100,10 +100,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SemanticVersion</span><span class="params">(<span name="major">major: <span class="extype" name="scala.Int">Int</span></span>, <span name="minor">minor: <span class="extype" name="scala.Int">Int</span></span>, <span name="patch">patch: <span class="extype" name="scala.Int">Int</span></span>, <span name="build">build: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">SemanticVersion</span><span class="params">(<span name="major">major: <span class="extype" name="scala.Int">Int</span></span>, <span name="minor">minor: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="patch">patch: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="build">build: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@&lt;init&gt;(major:Int,minor:Int,patch:Int,build:Option[String]):nl.biopet.utils.SemanticVersion" title="Permalink" target="_top">
+      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@&lt;init&gt;(major:Int,minor:Option[Int],patch:Option[Int],build:Option[String]):nl.biopet.utils.SemanticVersion" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -439,18 +439,18 @@ Example 0.8.0-alpha &lt; 0.8.0-beta &lt; 0.8.0</p></div><dl class="attributes bl
     </span>
       
     </li><li name="nl.biopet.utils.SemanticVersion#minor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="minor:Int"></a>
-      <a id="minor:Int"></a>
+      <a id="minor:Option[Int]"></a>
+      <a id="minor:Option[Int]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">minor</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">minor</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@minor:Int" title="Permalink" target="_top">
+      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@minor:Option[Int]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -507,18 +507,18 @@ Example 0.8.0-alpha &lt; 0.8.0-beta &lt; 0.8.0</p></div><dl class="attributes bl
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="nl.biopet.utils.SemanticVersion#patch" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="patch:Int"></a>
-      <a id="patch:Int"></a>
+      <a id="patch:Option[Int]"></a>
+      <a id="patch:Option[Int]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">patch</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">patch</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@patch:Int" title="Permalink" target="_top">
+      <a href="../../../index.html#nl.biopet.utils.SemanticVersion@patch:Option[Int]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
