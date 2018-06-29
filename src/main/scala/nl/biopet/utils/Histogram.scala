@@ -28,9 +28,8 @@ import nl.biopet.utils.rscript.LinePlot
 import scala.concurrent.ExecutionContext
 import scala.io.Source
 
-class Histogram[T](_counts: Map[T, Long] = Map[T, Long]())(
-    implicit ord: Numeric[T])
-    extends Counts[T](_counts) {
+class Histogram[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Numeric[T])
+    extends Counts[T](c) {
   def aggregateStats: Map[String, Any] = {
     val values = this.counts.keys.toList
     val counts = this.counts.values.toList
@@ -40,20 +39,19 @@ class Histogram[T](_counts: Map[T, Long] = Map[T, Long]())(
       val totalCounts = counts.sum
       val mean: Double = values
         .zip(counts)
-        .map(x => ord.toDouble(x._1) * x._2)
+        .map { case (k, v) => ord.toDouble(k) * v }
         .sum / totalCounts
-      val median = values(
-        values
-          .zip(counts)
-          .zipWithIndex
-          .sortBy(_._1._1)
-          .foldLeft((0L, 0)) {
-            case (a, b) =>
-              val total = a._1 + b._1._2
-              if (total >= totalCounts / 2) (total, a._2)
-              else (total, b._2)
-          }
-          ._2)
+      val (_, medianIdx) = values
+        .zip(counts)
+        .zipWithIndex
+        .sortBy { case ((x, _), _) => x }
+        .foldLeft((0L, 0)) {
+          case ((av, ai), ((bv, bc), bi)) =>
+            val total = av + bc
+            if (total >= totalCounts / 2) (total, ai)
+            else (total, bi)
+        }
+      val median = values(medianIdx)
       Map("min" -> values.min,
           "max" -> values.max,
           "median" -> median,
@@ -65,7 +63,7 @@ class Histogram[T](_counts: Map[T, Long] = Map[T, Long]())(
   /** Write histogram to a tsv/count file */
   def writeAggregateToTsv(file: File): Unit = {
     val writer = new PrintWriter(file)
-    aggregateStats.foreach(x => writer.println(x._1 + "\t" + x._2))
+    aggregateStats.foreach { case (k, v) => writer.println(s"$k\t$v") }
     writer.close()
   }
 
@@ -98,9 +96,15 @@ object Histogram {
   def fromFile[T](file: File, converter: String => T)(
       implicit ord: Numeric[T]): Histogram[T] = {
     val map = fromMultiHistogramFile(file, converter)
-    require(map.nonEmpty, s"File does not contain a histogram: $file")
-    require(map.size == 1, s"File has multiple histograms: $file")
-    map.head._2
+    map.headOption match {
+      case Some(_) if map.size > 1 =>
+        throw new IllegalArgumentException(
+          s"File has multiple histograms: $file")
+      case Some((_, h)) => h
+      case _ =>
+        throw new IllegalArgumentException(
+          s"File does not contain a histogram: $file")
+    }
   }
 
   /** Reading Multiple histograms from a single file */
@@ -118,8 +122,9 @@ object Histogram {
     (for ((name, idx) <- header)
       yield
         name -> {
-          new Histogram[T](
-            values.flatMap(x => x._2.lift(idx).flatten.map(x._1 -> _)))
+          new Histogram[T](values.flatMap {
+            case (k, v) => v.lift(idx).flatten.map(k -> _)
+          })
         }).toMap
   }
 }

@@ -30,10 +30,9 @@ import scala.collection.mutable
 /**
   * Created by pjvanthof on 05/07/16.
   */
-class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
-    implicit ord: Ordering[T])
+class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     extends Serializable {
-  protected[Counts] val counts: mutable.Map[T, Long] = mutable.Map() ++ _counts
+  protected[Counts] val counts: mutable.Map[T, Long] = mutable.Map() ++ c
 
   /** Returns histogram as map */
   def countsMap: Map[T, Long] = counts.toMap
@@ -43,8 +42,10 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
 
   /** This will add an other histogram to `this` */
   def +=(other: Counts[T]): this.type = {
-    other.counts.foreach(x =>
-      this.counts += x._1 -> (this.counts.getOrElse(x._1, 0L) + x._2))
+    other.counts.foreach {
+      case (k, v) =>
+        this.counts += k -> (this.counts.getOrElse(k, 0L) + v)
+    }
     this
   }
 
@@ -114,16 +115,16 @@ object Counts {
     writer.println(countMap.keys.mkString(s"$headerPrefix\t", "\t", ""))
     val keys =
       countMap
-        .foldLeft(Set[T]())((a, b) => a ++ b._2.counts.keys)
+        .foldLeft(Set[T]()) { case (a, (_, b)) => a ++ b.counts.keys }
         .toList
         .sorted
     val counts = if (acumolate) {
-      countMap.map(x => x._1 -> x._2.acumolateCounts(reverse))
-    } else countMap.map(x => x._1 -> x._2.countsMap)
+      countMap.map { case (k, v) => k -> v.acumolateCounts(reverse) }
+    } else countMap.map { case (k, v) => k -> v.countsMap }
     for (value <- if (reverse) keys.reverse else keys) {
       writer.println(
         countMap
-          .map(s => counts(s._1).getOrElse(value, ""))
+          .map { case (s, _) => counts(s).getOrElse(value, "") }
           .mkString(value + "\t", "\t", ""))
     }
     writer.close()

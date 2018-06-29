@@ -30,12 +30,12 @@ package object utils {
       .getOrElse("unpackaged")
 
   def textToSize(text: String): Long = {
-    text.last match {
-      case 'g' | 'G' =>
+    text.lastOption match {
+      case Some('g') | Some('G') =>
         ((1L << 30) * text.stripSuffix("g").stripSuffix("G").toDouble).toLong
-      case 'm' | 'M' =>
+      case Some('m') | Some('M') =>
         ((1L << 20) * text.stripSuffix("m").stripSuffix("M").toDouble).toLong
-      case 'k' | 'K' =>
+      case Some('k') | Some('K') =>
         ((1L << 10) * text.stripSuffix("k").stripSuffix("K").toDouble).toLong
       case _ => text.toLong
     }

@@ -24,7 +24,7 @@ package nl.biopet.utils.rscript
 import java.io.{File, FileOutputStream}
 
 import nl.biopet.utils.Logging
-import nl.biopet.utils.process.Sys
+import nl.biopet.utils.process.{AsyncProcess, Sys}
 
 import scala.collection.mutable
 import scala.concurrent.duration.Duration
@@ -68,7 +68,8 @@ trait Rscript extends Logging {
     val results = Sys.execAsync(cmd)
 
     val (exitcode, stdout, stderr) =
-      Await.result(results.map(x => (x._1, x._2, x._3)), Duration.Inf)
+      Await.result(results.map { case (exit, out, err) => (exit, out, err) },
+                   Duration.Inf)
 
     Logging.logger.info("stdout:\n" + stdout + "\n")
     Logging.logger.info("stderr:\n" + stderr)
