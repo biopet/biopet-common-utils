@@ -48,57 +48,10 @@ import scala.concurrent.duration.Duration
 import scala.sys.process.{Process, ProcessLogger}
 import scala.util.Try
 
-object Sys extends Sys {
-  type ExitValue = Int
-  type Stdout = String
-  type Stderr = String
-
-  type ExecResult = (ExitValue, Stdout, Stderr)
-
-  trait AsyncExecResult {
-
-    /**
-      * @see [[scala.concurrent.Future#map]]
-      */
-    def map[T](f: ExecResult => T): Future[T]
-
-    /**
-      * @see [[scala.concurrent.Future#foreach]]
-      */
-    def foreach(f: ExecResult => Unit): Unit
-
-    /**
-      * @see [[scala.concurrent.Future#onComplete]]
-      */
-    def onComplete[T](pf: Try[ExecResult] => T): Unit
-
-    /** cancels the running process */
-    def cancel(): Unit
-
-    /**
-      * check if the process is still running
-      * @return `true` if the process is already completed, `false` otherwise
-      */
-    def isRunning: Boolean
-
-    /**
-      * the underlying future
-      * @return the future, in which the process runs
-      */
-    def get: Future[ExecResult]
-  }
-
-  type Cancelable = () => Unit
-
-  case class ExecutionCanceled(msg: String) extends Exception(msg)
-}
-
-trait Sys {
-  import Sys._
-
+trait AsyncProcess {
   private val cache: ParMap[Seq[String], AsyncExecResult] = ParMap()
 
-  var maxRunningProcesses: Int = 5
+  val maxRunningProcesses: Int = 5
 
   def execString(cmd: String,
                  cwd: Option[File] = None,
@@ -124,11 +77,11 @@ trait Sys {
         Process(cmd, cwd, env.toList: _*).run(
           ProcessLogger(stdout.appendLine, stderr.appendLine))
       proc.exitValue()
-    }.map((_, stdout.get, stderr.get))
+    }.map((_, stdout.getOutput, stderr.getOutput))
       .recover {
         case t => (-1, "", t.getMessage)
       }
-      .get
+      .getOrElse(throw new IllegalStateException)
   }
 
   def execAsyncString(cmd: String,
@@ -191,7 +144,6 @@ trait Sys {
                        cwd: Option[File] = None,
                        env: Map[String, String] = Map())(
       implicit ec: ExecutionContext): (Future[ExecResult], Cancelable) = {
-    val p = Promise[ExecResult]
 
     val stdout = new OutputSlurper
     val stderr = new OutputSlurper
@@ -200,13 +152,14 @@ trait Sys {
     val proc =
       Process(cmd, cwd, env.toList: _*)
         .run(ProcessLogger(stdout.appendLine, stderr.appendLine))
+    val p = Promise[ExecResult]
     p.tryCompleteWith(
-      Future(proc.exitValue).map(c => (c, stdout.get, stderr.get)))
+      Future(proc.exitValue).map(c => (c, stdout.getOutput, stderr.getOutput)))
 
     val cancel = () => {
       p.tryFailure {
-        Logging.logger.error("stdout: " + stdout.get)
-        Logging.logger.error("stderr: " + stderr.get)
+        Logging.logger.error("stdout: " + stdout.getOutput)
+        Logging.logger.error("stderr: " + stderr.getOutput)
         ExecutionCanceled(s"Process: '${cmd.mkString(" ")}' canceled")
       }
       proc.destroy()
@@ -222,6 +175,6 @@ trait Sys {
 
     def appendLine(s: String): Unit = append(s + "\n")
 
-    def get: String = sb.toString
+    def getOutput: String = sb.toString
   }
 }

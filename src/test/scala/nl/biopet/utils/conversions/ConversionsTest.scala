@@ -114,7 +114,6 @@ class ConversionsTest extends BiopetTest {
 
   @Test
   def testAnyToMap(): Unit = {
-    any2map(null) shouldBe null
     any2map(Map("bla" -> 3)) shouldBe Map("bla" -> 3)
     any2map(new java.util.LinkedHashMap) shouldBe Map()
 

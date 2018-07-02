@@ -25,7 +25,6 @@ import java.io.File
 import java.nio.file.Files
 
 import nl.biopet.test.BiopetTest
-import nl.biopet.utils.process.Sys.{ExitValue, Stderr, Stdout}
 import org.testng.annotations.Test
 
 import scala.concurrent.Await
@@ -81,7 +80,6 @@ class SysTest extends BiopetTest {
 
   @Test
   def testMultiAsync(): Unit = {
-    Sys.maxRunningProcesses = 1
     val process = Sys.execAsync(Seq("echo", "bla"))
     val process2 = Sys.execAsync(Seq("echo", "bla"))
     val process3 = Sys.execAsync(Seq("echo", "bla"))
@@ -98,7 +96,6 @@ class SysTest extends BiopetTest {
 
   @Test
   def testCancel(): Unit = {
-    Sys.maxRunningProcesses = 1
     val process = Sys.execAsync(Seq("echo", "bla"))
     process.cancel()
   }
@@ -123,6 +120,7 @@ class SysTest extends BiopetTest {
       }
     }
   }
+
   @Test
   def testEnv(): Unit = {
     val process =
@@ -135,6 +133,7 @@ class SysTest extends BiopetTest {
     }
   }
 
+  @Test
   def testEnvAsync(): Unit = {
     val process =
       Sys.execAsyncString("printenv TEST", env = Map("TEST" -> "TestMessage"))
