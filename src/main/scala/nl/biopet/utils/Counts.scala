@@ -99,6 +99,15 @@ class Counts[T](_counts: Map[T, Long] = Map[T, Long]())(
   def toJson: JsValue = {
     conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
   }
+
+  def toDoubleArray: Counts.DoubleArray[T] = {
+    val (keySeq, countSeq) =
+      counts.foldLeft((IndexedSeq[T](), IndexedSeq[Long]())) {
+        case ((keyList, countList), (key, count)) =>
+          (keyList :+ key, countList :+ count)
+      }
+    Counts.DoubleArray(keySeq, countSeq)
+  }
 }
 
 object Counts {
@@ -130,6 +139,10 @@ object Counts {
   }
 
   private case class Schema(map: Map[String, Long])
+  case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
+    require(values.size == counts.size,
+            "Values and counts do not have the same length.")
+  }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
     implicit val read: Reads[Schema] = Json.reads[Schema]
