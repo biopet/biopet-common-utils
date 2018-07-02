@@ -135,7 +135,7 @@ class HistogramTest extends BiopetTest {
 
     intercept[IllegalArgumentException] {
       Histogram.fromFile(outputFile, _.toInt)
-    }.getMessage shouldBe s"requirement failed: File has multiple histograms: $outputFile"
+    }.getMessage shouldBe s"File has multiple histograms: $outputFile"
 
     val histograms = Histogram.fromMultiHistogramFile(outputFile, _.toInt)
 

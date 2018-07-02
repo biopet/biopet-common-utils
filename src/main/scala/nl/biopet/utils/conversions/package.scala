@@ -45,18 +45,13 @@ package object conversions {
                 resolveConflict: (Any, Any, String) => Any = (m1, _, _) => m1)
     : Map[String, Any] = {
     (for (key <- map1.keySet.++(map2.keySet)) yield {
-      if (!map2.contains(key)) key -> map1(key)
-      else if (!map1.contains(key)) key -> map2(key)
-      else {
-        map1(key) match {
-          case m1: Map[_, _] =>
-            map2(key) match {
-              case m2: Map[_, _] =>
-                key -> mergeMaps(any2map(m1), any2map(m2), resolveConflict)
-              case _ => key -> resolveConflict(map1(key), map2(key), key)
-            }
-          case _ => key -> resolveConflict(map1(key), map2(key), key)
-        }
+      (map1.get(key), map2.get(key)) match {
+        case (Some(v1: Map[_, _]), Some(v2: Map[_, _])) =>
+          key -> mergeMaps(any2map(v1), any2map(v2), resolveConflict)
+        case (Some(v1), Some(v2)) => key -> resolveConflict(v1, v2, key)
+        case (Some(v1), _)        => key -> v1
+        case (_, Some(v2))        => key -> v2
+        case _                    => throw new IllegalArgumentException("Key has no value")
       }
     }).toMap
   }
@@ -76,9 +71,8 @@ package object conversions {
   /** Convert Any to Map[String, Any] */
   def any2map(any: Any): Map[String, Any] = {
     any match {
-      case m: Map[_, _]                     => m.map(x => x._1.toString -> x._2)
+      case m: Map[_, _]                     => m.map { case (k, v) => k.toString -> v }
       case m: java.util.LinkedHashMap[_, _] => nestedJavaHashMaptoScalaMap(m)
-      case null                             => null
       case _ =>
         throw new IllegalStateException("Value '" + any + "' is not an Map")
     }
@@ -87,15 +81,15 @@ package object conversions {
   /** Convert nested java hash map to scala hash map */
   def nestedJavaHashMaptoScalaMap(
       input: java.util.LinkedHashMap[_, _]): Map[String, Any] = {
-    input
-      .map(value => {
-        value._2 match {
+    input.map {
+      case (k, v) => {
+        v match {
           case m: java.util.LinkedHashMap[_, _] =>
-            value._1.toString -> nestedJavaHashMaptoScalaMap(m)
-          case _ => value._1.toString -> value._2
+            k.toString -> nestedJavaHashMaptoScalaMap(m)
+          case _ => k.toString -> v
         }
-      })
-      .toMap
+      }
+    }.toMap
   }
 
   lazy val yaml = new Yaml()
@@ -150,23 +144,23 @@ package object conversions {
 
   /** Convert native scala value to json, fall back on .toString if type is not a native scala value */
   def anyToJson(any: Any): JsValue = {
-    any match {
-      case j: JsValue => j
-      case None       => JsNull
-      case Some(x)    => anyToJson(x)
-      case m: Map[_, _] =>
-        mapToJson(m.map(m => m._1.toString -> anyToJson(m._2)))
-      case l: List[_]  => JsArray(l.map(anyToJson))
-      case l: Array[_] => JsArray(l.map(anyToJson))
-      case b: Boolean  => JsBoolean(b)
-      case n: Int      => JsNumber(n)
-      case n: Double   => JsNumber(n)
-      case n: Long     => JsNumber(n)
-      case n: Short    => JsNumber(n.toInt)
-      case n: Float    => JsNumber(n.toDouble)
-      case n: Byte     => JsNumber(n.toInt)
-      case null        => JsNull
-      case _           => JsString(any.toString)
+    Option(any) match {
+      case Some(j: JsValue) => j
+      case Some(Some(x))    => anyToJson(x)
+      case Some(m: Map[_, _]) =>
+        mapToJson(m.map { case (k, v) => k.toString -> anyToJson(v) })
+      case Some(l: List[_])  => JsArray(l.map(anyToJson))
+      case Some(l: Array[_]) => JsArray(l.map(anyToJson))
+      case Some(b: Boolean)  => JsBoolean(b)
+      case Some(n: Int)      => JsNumber(n)
+      case Some(n: Double)   => JsNumber(n)
+      case Some(n: Long)     => JsNumber(n)
+      case Some(n: Short)    => JsNumber(n.toInt)
+      case Some(n: Float)    => JsNumber(n.toDouble)
+      case Some(n: Byte)     => JsNumber(n.toInt)
+      case Some(None)        => JsNull
+      case Some(_)           => JsString(any.toString)
+      case _                 => JsNull
     }
   }
 
@@ -201,13 +195,13 @@ package object conversions {
 
   /** Convert value into a scala list */
   def anyToList(value: Any): List[Any] = {
-    value match {
-      case null                 => Nil
-      case l: List[_]           => l
-      case l: util.ArrayList[_] => l.toList
-      case Some(x)              => anyToList(x)
-      case None                 => Nil
-      case l                    => l :: Nil
+    Option(value) match {
+      case Some(l: List[_])           => l
+      case Some(l: util.ArrayList[_]) => l.toList
+      case Some(Some(x))              => anyToList(x)
+      case Some(None)                 => Nil
+      case Some(l)                    => l :: Nil
+      case _                          => Nil
     }
   }
 
