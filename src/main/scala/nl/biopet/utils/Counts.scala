@@ -124,7 +124,7 @@ object Counts {
     for (value <- if (reverse) keys.reverse else keys) {
       writer.println(
         countMap
-          .map { case (s, _) => counts(s).getOrElse(value, "") }
+          .map { case (k, _) => counts(k).getOrElse(value, "") }
           .mkString(value + "\t", "\t", ""))
     }
     writer.close()
