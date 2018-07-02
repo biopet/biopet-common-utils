@@ -37,8 +37,7 @@ class Histogram[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Numeric[T])
     if (values.nonEmpty) {
       val modal = values(counts.indexOf(counts.max))
       val totalCounts = counts.sum
-      val mean: Double = values
-        .zip(counts)
+      val mean: Double = this.counts
         .map { case (k, v) => ord.toDouble(k) * v }
         .sum / totalCounts
       val (_, medianIdx) = values
