@@ -109,6 +109,10 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
       }
     Counts.DoubleArray(keySeq, countSeq)
   }
+
+  def fromDoubleArray(doubleArray: Counts.DoubleArray[T]): Counts[T] = {
+    Counts(doubleArray.values.zip(doubleArray.counts).toMap)
+  }
 }
 
 object Counts {
