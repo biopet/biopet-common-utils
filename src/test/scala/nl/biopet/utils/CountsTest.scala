@@ -189,4 +189,14 @@ class CountsTest extends BiopetTest {
     c1.acumolateCounts() shouldBe Map(1 -> 1, 2 -> 3, 3 -> 6)
     c1.acumolateCounts(true) shouldBe Map(1 -> 6, 2 -> 5, 3 -> 3)
   }
+
+  @Test
+  def testToDoubleArray(): Unit = {
+    val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
+    val doubleArray = c1.toDoubleArray
+    doubleArray.values.toSet shouldBe Set("1", "2", "3")
+    doubleArray.counts.toSet shouldBe Set(1, 2, 3)
+    Counts.fromDoubleArray(doubleArray) shouldBe c1
+  }
+
 }

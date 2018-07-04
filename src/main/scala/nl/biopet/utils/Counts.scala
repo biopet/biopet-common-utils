@@ -101,6 +101,10 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
   }
 
+  /**
+    * Converts to two IndexedSeqs, one containing values, and one containing counts.
+    * @return
+    */
   def toDoubleArray: Counts.DoubleArray[T] = {
     val (keySeq, countSeq) =
       counts.foldLeft((IndexedSeq[T](), IndexedSeq[Long]())) {
@@ -110,9 +114,6 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     Counts.DoubleArray(keySeq, countSeq)
   }
 
-  def fromDoubleArray(doubleArray: Counts.DoubleArray[T]): Counts[T] = {
-    Counts(doubleArray.values.zip(doubleArray.counts).toMap)
-  }
 }
 
 object Counts {
@@ -143,10 +144,24 @@ object Counts {
     writer.close()
   }
 
+  def fromDoubleArray[T](doubleArray: Counts.DoubleArray[T])(
+      implicit ord: Ordering[T]): Counts[T] = {
+    new Counts[T](doubleArray.toMap)
+  }
+
   private case class Schema(map: Map[String, Long])
+
+  /**
+    * A class that stores a T,Long dictionary as two sequences, that can be zipped.
+    * @param values An IndexedSeq of values
+    * @param counts An IndexedSeq of counts
+    * @tparam T
+    */
   case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
     require(values.size == counts.size,
             "Values and counts do not have the same length.")
+
+    def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
   }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
