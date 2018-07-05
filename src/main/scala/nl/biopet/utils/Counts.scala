@@ -117,6 +117,12 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
 }
 
 object Counts {
+  object Implicits {
+    implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
+      Json.reads[Counts.DoubleArray[T]]
+    implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
+      Json.writes[Counts.DoubleArray[T]]
+  }
 
   /** This will write multiple counts into a single file */
   def writeMultipleCounts[T](
