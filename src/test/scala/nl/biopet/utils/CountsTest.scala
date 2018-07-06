@@ -27,6 +27,7 @@ import nl.biopet.test.BiopetTest
 import org.scalatest.Matchers
 import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.Test
+import play.api.libs.json
 
 import scala.io.Source
 
@@ -199,4 +200,13 @@ class CountsTest extends BiopetTest {
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
+  @Test
+  def testDoubleArrayToJson: Unit = {
+    val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
+    val doubleArray = c1.toDoubleArray
+    val jsonString = json.Json.stringify(json.Json.toJson(doubleArray))
+    jsonString shouldBe
+      """{"values":["1","2","3"],"counts":[1,2,3]}""".stripMargin
+    Counts.fromDoubleArray(doubleArray) shouldBe c1
+  }
 }

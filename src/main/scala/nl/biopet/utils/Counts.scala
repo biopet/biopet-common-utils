@@ -166,10 +166,12 @@ object Counts {
   }
 
   object Implicits {
+
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
-      (indexedSeq: IndexedSeq[T]) =>
-        Json.arr(
-          indexedSeq.toList.flatMap(
+      new Writes[IndexedSeq[T]] {
+        def writes(indexedSeq: IndexedSeq[T]): JsValue =
+          Json.arr(
+            indexedSeq.toList.flatMap(
             x => {
               val json = anyToJson(x)
               json match {
@@ -178,20 +180,24 @@ object Counts {
                     "List element may not be null")
                 case _ => Some(json)
               }
-            }
-          ))
-
-    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
-      (json: JsValue) => {
-        json.validate[IndexedSeq[T]]
+            }))
       }
 
+    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
+      new Reads[IndexedSeq[T]] {
+        def reads(indexedSeq: JsValue): JsResult[IndexedSeq[T]] = {
+          val result = Json.fromJson[List[T]](indexedSeq)
+          result.map(list => list.toIndexedSeq)
+        }
+      }
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
       Json.reads[Counts.DoubleArray[T]]
 
     implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
       Json.writes[Counts.DoubleArray[T]]
-  }
+
+
+      }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
     implicit val read: Reads[Schema] = Json.reads[Schema]
