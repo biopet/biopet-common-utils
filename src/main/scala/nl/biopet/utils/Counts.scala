@@ -166,7 +166,6 @@ object Counts {
   }
 
   object Implicits {
-
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
       new Writes[IndexedSeq[T]] {
         def writes(indexedSeq: IndexedSeq[T]): JsValue =
@@ -182,12 +181,33 @@ object Counts {
               }
             }))
       }
-
+    implicit def readsAny[T]: Reads[T] =
+      new Reads[T] {
+        def reads(json: JsValue): JsResult[T] =
+          List(json.validate[Int],
+            json.validate[Float],
+            json.validate[Double],
+            json.validate[Long],
+            json.validate[String]).filter(_.isSuccess).head.map(
+             _ match {
+               case a: T => a
+             }
+          )
+      }
     implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
       new Reads[IndexedSeq[T]] {
         def reads(indexedSeq: JsValue): JsResult[IndexedSeq[T]] = {
-          val result = Json.fromJson[List[T]](indexedSeq)
-          result.map(list => list.toIndexedSeq)
+          val read = Json.fromJson[List[JsValue]](indexedSeq)
+          val result = read match {
+            case a => a.map(_.toIndexedSeq)
+            case _ => throw new IllegalStateException("Cannot convert js value")
+          }
+          result.map(f => f.map( _.validate[T].asOpt match {
+            case Some(a) => a
+            case _ => throw new Exception()
+          }
+          )
+          )
         }
       }
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
