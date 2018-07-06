@@ -24,11 +24,10 @@ package nl.biopet.utils
 import java.io.File
 
 import nl.biopet.test.BiopetTest
-import nl.biopet.utils.Counts.Implicits._
+import nl.biopet.utils.Counts.DoubleArray
 import org.testng.annotations.Test
-import play.api.libs.json
+import play.api.libs.json.Json
 
-import scala.collection.immutable.ListMap
 import scala.io.Source
 
 /**
@@ -201,13 +200,35 @@ class CountsTest extends BiopetTest {
   }
 
   @Test
-  def testDoubleArrayToJson: Unit = {
-    val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
-    val doubleArray = c1.toDoubleArray
-    val jsonString = json.Json.stringify(json.Json.toJson(doubleArray))
-    println(jsonString)
-    jsonString shouldBe
-      "{\"values\":[\"2\",\"1\",\"3\"],\"counts\":[2,1,3]}"
-    Counts.fromDoubleArray(doubleArray) shouldBe c1
+  def testDoubleArrayToJsonSucces(): Unit = {
+    val daString = DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3))
+    Json.stringify(daString.toJson) shouldBe
+      """{"values":["1","2","3"],"counts":[1,2,3]}"""
+
+    val daInt = DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3))
+    Json.stringify(daInt.toJson) shouldBe
+      """{"values":[1,2,3],"counts":[1,2,3]}"""
+
+    val daLong = DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3))
+    Json.stringify(daLong.toJson) shouldBe
+      """{"values":[1,2,3],"counts":[1,2,3]}"""
+
+    val daFloat = DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3))
+    Json.stringify(daFloat.toJson) shouldBe
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+
+    val daDouble =
+      DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3))
+    Json.stringify(daDouble.toJson) shouldBe
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
   }
+
+  @Test
+  def testDoubleArrayToJsonFail(): Unit = ???
+
+  @Test
+  def testDoubleArrayFromJsonSucces(): Unit = ???
+
+  @Test
+  def testDoubleArrayFromJsonFail(): Unit = ???
 }

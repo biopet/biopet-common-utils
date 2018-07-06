@@ -25,7 +25,7 @@ import java.io.{File, PrintWriter}
 
 import nl.biopet.utils.conversions.anyToJson
 import play.api.libs.json._
-
+import nl.biopet.utils.Counts.Implicits._
 import scala.collection.mutable
 
 /**
@@ -152,19 +152,6 @@ object Counts {
 
   private case class Schema(map: Map[String, Long])
 
-  /**
-    * A class that stores a T,Long dictionary as two sequences, that can be zipped.
-    * @param values An IndexedSeq of values
-    * @param counts An IndexedSeq of counts
-    * @tparam T A jsonifiable type
-    */
-  case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
-    require(values.size == counts.size,
-            "Values and counts do not have the same length.")
-
-    def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
-  }
-
   object Implicits {
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
       new Writes[IndexedSeq[T]] {
@@ -202,6 +189,21 @@ object Counts {
     implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
       Json.writes[Counts.DoubleArray[T]]
 
+  }
+
+  /**
+    * A class that stores a T,Long dictionary as two sequences, that can be zipped.
+    * @param values An IndexedSeq of values
+    * @param counts An IndexedSeq of counts
+    * @tparam T A jsonifiable type
+    */
+  case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
+    require(values.size == counts.size,
+            "Values and counts do not have the same length.")
+
+    def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
+
+    def toJson: JsValue = Json.toJson(this)
   }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
