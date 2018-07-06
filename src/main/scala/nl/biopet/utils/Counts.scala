@@ -187,29 +187,15 @@ object Counts {
                json.validate[Long],
                json.validate[String])
             .filter(_.isSuccess)
-            .head
+            .headOption
+            .getOrElse(throw new IllegalStateException(""))
             .map(
               _ match {
                 case a: T => a
               }
             )
       }
-//    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
-//      new Reads[IndexedSeq[T]] {
-//        def reads(indexedSeq: JsValue): JsResult[IndexedSeq[T]] = {
-//          val read = Json.fromJson[List[T]](indexedSeq)
-//          val result = read match {
-//            case a => a.map(_.toIndexedSeq)
-//            case _ => throw new IllegalStateException("Cannot convert js value")
-//          }
-////          result.map(f =>
-////            f.map(_.validate[T].asOpt match {
-////              case Some(a) => a
-////              case _       => throw new Exception()
-////            }))
-//          result
-//        }
-    //}
+
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
       Json.reads[Counts.DoubleArray[T]]
 
