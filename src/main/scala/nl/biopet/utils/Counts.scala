@@ -169,7 +169,7 @@ object Counts {
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
       new Writes[IndexedSeq[T]] {
         def writes(indexedSeq: IndexedSeq[T]): JsValue =
-          Json.arr(indexedSeq.toList.flatMap(x => {
+          anyToJson(indexedSeq.toList.flatMap(x => {
             val json = anyToJson(x)
             json match {
               case JsNull =>
@@ -194,21 +194,22 @@ object Counts {
               }
             )
       }
-    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
-      new Reads[IndexedSeq[T]] {
-        def reads(indexedSeq: JsValue): JsResult[IndexedSeq[T]] = {
-          val read = Json.fromJson[List[JsValue]](indexedSeq)
-          val result = read match {
-            case a => a.map(_.toIndexedSeq)
-            case _ => throw new IllegalStateException("Cannot convert js value")
-          }
-          result.map(f =>
-            f.map(_.validate[T].asOpt match {
-              case Some(a) => a
-              case _       => throw new Exception()
-            }))
-        }
-      }
+//    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
+//      new Reads[IndexedSeq[T]] {
+//        def reads(indexedSeq: JsValue): JsResult[IndexedSeq[T]] = {
+//          val read = Json.fromJson[List[T]](indexedSeq)
+//          val result = read match {
+//            case a => a.map(_.toIndexedSeq)
+//            case _ => throw new IllegalStateException("Cannot convert js value")
+//          }
+////          result.map(f =>
+////            f.map(_.validate[T].asOpt match {
+////              case Some(a) => a
+////              case _       => throw new Exception()
+////            }))
+//          result
+//        }
+    //}
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
       Json.reads[Counts.DoubleArray[T]]
 

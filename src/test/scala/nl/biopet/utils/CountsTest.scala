@@ -28,6 +28,7 @@ import nl.biopet.utils.Counts.Implicits._
 import org.testng.annotations.Test
 import play.api.libs.json
 
+import scala.collection.immutable.ListMap
 import scala.io.Source
 
 /**
@@ -204,8 +205,9 @@ class CountsTest extends BiopetTest {
     val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
     val doubleArray = c1.toDoubleArray
     val jsonString = json.Json.stringify(json.Json.toJson(doubleArray))
+    println(jsonString)
     jsonString shouldBe
-      """{"values":["1","2","3"],"counts":[1,2,3]}""".stripMargin
+      "{\"values\":[\"2\",\"1\",\"3\"],\"counts\":[2,1,3]}"
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 }
