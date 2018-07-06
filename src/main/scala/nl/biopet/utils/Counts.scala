@@ -206,6 +206,10 @@ object Counts {
     def toJson: JsValue = Json.toJson(this)
   }
 
+  object DoubleArray {
+    def fromJson[T](jsValue: JsValue): DoubleArray[T] = ???
+  }
+
   def mapFromJson(json: JsValue): Map[String, Long] = {
     implicit val read: Reads[Schema] = Json.reads[Schema]
     Json.reads[Schema].reads(json) match {
