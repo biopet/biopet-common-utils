@@ -24,8 +24,7 @@ package nl.biopet.utils
 import java.io.File
 
 import nl.biopet.test.BiopetTest
-import org.scalatest.Matchers
-import org.scalatest.testng.TestNGSuite
+import nl.biopet.utils.Counts.Implicits._
 import org.testng.annotations.Test
 import play.api.libs.json
 
