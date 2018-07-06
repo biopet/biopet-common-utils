@@ -23,6 +23,7 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
+import nl.biopet.utils.conversions.anyToJson
 import play.api.libs.json._
 
 import scala.collection.mutable
@@ -103,7 +104,7 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
 
   /**
     * Converts to two IndexedSeqs, one containing values, and one containing counts.
-    * @return
+    * @return Returns a doubleArray
     */
   def toDoubleArray: Counts.DoubleArray[T] = {
     val (keySeq, countSeq) =
@@ -117,12 +118,6 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
 }
 
 object Counts {
-  object Implicits {
-    implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
-      Json.reads[Counts.DoubleArray[T]]
-    implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
-      Json.writes[Counts.DoubleArray[T]]
-  }
 
   /** This will write multiple counts into a single file */
   def writeMultipleCounts[T](
@@ -161,13 +156,41 @@ object Counts {
     * A class that stores a T,Long dictionary as two sequences, that can be zipped.
     * @param values An IndexedSeq of values
     * @param counts An IndexedSeq of counts
-    * @tparam T
+    * @tparam T A jsonifiable type
     */
   case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
     require(values.size == counts.size,
             "Values and counts do not have the same length.")
 
     def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
+  }
+
+  object Implicits {
+    implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
+      (indexedSeq: IndexedSeq[T]) =>
+        Json.arr(
+          indexedSeq.toList.flatMap(
+            x => {
+              val json = anyToJson(x)
+              json match {
+                case JsNull =>
+                  throw new IllegalStateException(
+                    "List element may not be null")
+                case _ => Some(json)
+              }
+            }
+          ))
+
+    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] =
+      (json: JsValue) => {
+        json.validate[IndexedSeq[T]]
+      }
+
+    implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
+      Json.reads[Counts.DoubleArray[T]]
+
+    implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
+      Json.writes[Counts.DoubleArray[T]]
   }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
