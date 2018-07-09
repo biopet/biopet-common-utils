@@ -207,7 +207,13 @@ object Counts {
   }
 
   object DoubleArray {
-    def fromJson[T](json: JsValue): DoubleArray[T] = ???
+    def fromJson[T](json: JsValue): DoubleArray[T] = {
+      implicit def read: Reads[DoubleArray[T]] = Json.reads[DoubleArray[T]]
+      Json.reads[DoubleArray[T]](json) match {
+        case x: JsSuccess[DoubleArray[T]] => x.value
+        case e: JsError => throw new IllegalStateException(e.toString)
+      }
+    }
   }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
