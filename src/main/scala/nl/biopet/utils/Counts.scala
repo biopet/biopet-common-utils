@@ -68,6 +68,10 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     writer.close()
   }
 
+  /**
+    * Create a summary map.
+    * @return Map of values and counts.
+    */
   def toSummaryMap: Map[String, List[Any]] = {
     val values = counts.keySet.toList.sortWith(sortAnyAny)
     Map("values" -> values, "counts" -> values.map(counts(_)))
@@ -98,6 +102,10 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     counts.values.sum
   }
 
+  /**
+    * Transcribe countmap into json.
+    * @return A json of the counts and values
+    */
   def toJson: JsValue = {
     conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
   }
@@ -145,6 +153,13 @@ object Counts {
     writer.close()
   }
 
+  /**
+    * Converts a doublearray into a counts object
+    * @param doubleArray the doubleArray
+    * @param ord Implicit ordering
+    * @tparam T The type of the items in the values list.
+    * @return A counts object.
+    */
   def fromDoubleArray[T](doubleArray: Counts.DoubleArray[T])(
       implicit ord: Ordering[T]): Counts[T] = {
     new Counts[T](doubleArray.toMap)
@@ -153,6 +168,12 @@ object Counts {
   private case class Schema(map: Map[String, Long])
 
   object Implicits {
+
+    /**
+      * Method to write an indexedSeq to json.
+      * @tparam T IndexedSeq can be of any type.
+      * @return A Writes object
+      */
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
       new Writes[IndexedSeq[T]] {
         def writes(indexedSeq: IndexedSeq[T]): JsValue =
@@ -166,6 +187,11 @@ object Counts {
           }))
       }
 
+    /**
+      * Method to read an indexedSeq from json.
+      * @tparam T Can be of type int,long,double or string
+      * @return A writhe method.
+      */
     implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] = {
       new Reads[IndexedSeq[T]] {
         def reads(json: JsValue): JsResult[IndexedSeq[T]] = {
@@ -182,6 +208,11 @@ object Counts {
       }
     }
 
+    /**
+      * Read double array type.
+      * @tparam T The type of the items in the values list.
+      * @return a reads method.
+      */
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
       new Reads[Counts.DoubleArray[T]] {
         def reads(json: JsValue): JsResult[DoubleArray[T]] = {
@@ -201,6 +232,11 @@ object Counts {
         }
       }
 
+    /**
+      * A method to write doublearrays
+      * @tparam T the type of the items in the value list.
+      * @return A json writes method.
+      */
     implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
       Json.writes[Counts.DoubleArray[T]]
 
@@ -222,6 +258,13 @@ object Counts {
   }
 
   object DoubleArray {
+
+    /**
+      * Convert a JsValue into a DoubleArray
+      * @param json a JsValue
+      * @tparam T The type of the items in the value list.
+      * @return a DoubleArray
+      */
     def fromJson[T](json: JsValue): DoubleArray[T] = {
       implicit def read: Reads[DoubleArray[T]] = Json.reads[DoubleArray[T]]
       Json.reads[DoubleArray[T]].reads(json) match {
@@ -231,6 +274,11 @@ object Counts {
     }
   }
 
+  /**
+    * Create a map[String,Long] using the schema
+    * @param json
+    * @return a map.
+    */
   def mapFromJson(json: JsValue): Map[String, Long] = {
     implicit val read: Reads[Schema] = Json.reads[Schema]
     Json.reads[Schema].reads(json) match {

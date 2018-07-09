@@ -200,6 +200,11 @@ class CountsTest extends BiopetTest {
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
+  /**
+    * Case class that can be used for easy testing of multiple doubleArray's.
+    * @param doubleArray
+    * @param jsonString
+    */
   case class TestDoubleArray(doubleArray: DoubleArray[Any], jsonString: String)
 
   val doubleArrays: Seq[TestDoubleArray] =
