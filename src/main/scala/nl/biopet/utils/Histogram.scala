@@ -105,6 +105,11 @@ object Histogram {
     }
   }
 
+  def fromDoubleArray[T](doubleArray: Counts.DoubleArray[T])(
+      implicit ord: Numeric[T]): Histogram[T] = {
+    new Histogram[T](doubleArray.toMap)
+  }
+
   /** Reading Multiple histograms from a single file */
   def fromMultiHistogramFile[T](file: File, converter: String => T)(
       implicit ord: Numeric[T]): Map[String, Histogram[T]] = {

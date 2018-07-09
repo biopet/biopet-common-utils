@@ -24,11 +24,12 @@ package nl.biopet.utils
 import java.io.File
 
 import nl.biopet.test.BiopetTest
-import org.scalatest.Matchers
-import org.scalatest.testng.TestNGSuite
+import nl.biopet.utils.Counts.DoubleArray
 import org.testng.annotations.Test
+import play.api.libs.json.Json
 
 import scala.io.Source
+import scala.reflect.internal.MissingRequirementError
 
 /**
   * Created by pjvan_thof on 19-7-16.
@@ -188,5 +189,76 @@ class CountsTest extends BiopetTest {
     val c1 = new Counts[Int](Map(1 -> 1, 2 -> 2, 3 -> 3))
     c1.acumolateCounts() shouldBe Map(1 -> 1, 2 -> 3, 3 -> 6)
     c1.acumolateCounts(true) shouldBe Map(1 -> 6, 2 -> 5, 3 -> 3)
+  }
+
+  @Test
+  def testToDoubleArray(): Unit = {
+    val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
+    val doubleArray = c1.toDoubleArray
+    doubleArray.values.toSet shouldBe Set("1", "2", "3")
+    doubleArray.counts.toSet shouldBe Set(1, 2, 3)
+    Counts.fromDoubleArray(doubleArray) shouldBe c1
+  }
+
+  case class TestDoubleArray(doubleArray: DoubleArray[Any], jsonString: String)
+
+  val doubleArrays: Seq[TestDoubleArray] =
+    Seq(
+      TestDoubleArray(
+        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
+        """{"values":["1","2","3"],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      )
+    )
+  @Test
+  def testDoubleArrayToJsonSucces(): Unit = {
+    doubleArrays.foreach { x =>
+      Json.stringify(x.doubleArray.toJson) shouldBe x.jsonString
+    }
+  }
+
+  @Test
+  def testDoubleArrayFromJsonSucces(): Unit = {
+    doubleArrays.foreach { x =>
+      DoubleArray.fromJson(Json.parse(x.jsonString)) shouldBe x.doubleArray
+    }
+  }
+  @Test
+  def testDoubleArrayToJsonFail(): Unit = {
+    // TODO: Implement tests that should fail when dumping to json.
+    // Cannot think of failing things that should fail right now.
+  }
+
+  @Test
+  def testDoubleArrayFail(): Unit = {
+    intercept[IllegalArgumentException] {
+      val daLengthMisMatch = DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
+    }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
+  }
+
+  @Test
+  def testDoubleArrayFromJsonFail(): Unit = {
+    val test = TestDoubleArray(
+      DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2)),
+      """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
+    )
+    intercept[IllegalStateException] {
+      DoubleArray.fromJson(Json.parse(test.jsonString)) shouldBe test.doubleArray
+    }.getMessage should include("JsError")
   }
 }

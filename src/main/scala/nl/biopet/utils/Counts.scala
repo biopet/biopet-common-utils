@@ -23,8 +23,9 @@ package nl.biopet.utils
 
 import java.io.{File, PrintWriter}
 
+import nl.biopet.utils.conversions.anyToJson
 import play.api.libs.json._
-
+import nl.biopet.utils.Counts.Implicits._
 import scala.collection.mutable
 
 /**
@@ -100,6 +101,20 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
   def toJson: JsValue = {
     conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
   }
+
+  /**
+    * Converts to two IndexedSeqs, one containing values, and one containing counts.
+    * @return Returns a doubleArray
+    */
+  def toDoubleArray: Counts.DoubleArray[T] = {
+    val (keySeq, countSeq) =
+      counts.foldLeft((IndexedSeq[T](), IndexedSeq[Long]())) {
+        case ((keyList, countList), (key, count)) =>
+          (keyList :+ key, countList :+ count)
+      }
+    Counts.DoubleArray(keySeq, countSeq)
+  }
+
 }
 
 object Counts {
@@ -130,7 +145,91 @@ object Counts {
     writer.close()
   }
 
+  def fromDoubleArray[T](doubleArray: Counts.DoubleArray[T])(
+      implicit ord: Ordering[T]): Counts[T] = {
+    new Counts[T](doubleArray.toMap)
+  }
+
   private case class Schema(map: Map[String, Long])
+
+  object Implicits {
+    implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
+      new Writes[IndexedSeq[T]] {
+        def writes(indexedSeq: IndexedSeq[T]): JsValue =
+          anyToJson(indexedSeq.toList.flatMap(x => {
+            val json = anyToJson(x)
+            json match {
+              case JsNull =>
+                throw new IllegalStateException("List element may not be null")
+              case _ => Some(json)
+            }
+          }))
+      }
+
+    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] = {
+      new Reads[IndexedSeq[T]] {
+        def reads(json: JsValue): JsResult[IndexedSeq[T]] = {
+          // First evaluate if it can be parsed as an index holding a simple type
+          List(json.validate[List[Int]],
+               json.validate[List[Long]],
+               json.validate[List[Double]],
+               json.validate[List[String]]).find(_.isSuccess) match {
+            case Some(JsSuccess(value: List[T], path)) =>
+              JsSuccess(value.toIndexedSeq, path)
+            case _ => JsError()
+          }
+        }
+      }
+    }
+
+    implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
+      new Reads[Counts.DoubleArray[T]] {
+        def reads(json: JsValue): JsResult[DoubleArray[T]] = {
+          json match {
+            case o: JsObject =>
+              val values: JsResult[IndexedSeq[T]] =
+                o.value("values").validate[IndexedSeq[T]]
+              val counts: JsResult[IndexedSeq[Long]] =
+                o.value("counts").validate[IndexedSeq[Long]]
+              JsSuccess(
+                DoubleArray(
+                  values.getOrElse(throw new IllegalStateException("")),
+                  counts.getOrElse(throw new IllegalStateException(""))))
+
+            case _ => throw new IllegalStateException("Not a object")
+          }
+        }
+      }
+
+    implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
+      Json.writes[Counts.DoubleArray[T]]
+
+  }
+
+  /**
+    * A class that stores a T,Long dictionary as two sequences, that can be zipped.
+    * @param values An IndexedSeq of values
+    * @param counts An IndexedSeq of counts
+    * @tparam T A jsonifiable type
+    */
+  case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
+    require(values.size == counts.size,
+            "Values and counts do not have the same length.")
+
+    def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
+
+    def toJson: JsValue = Json.toJson(this)
+  }
+
+  object DoubleArray {
+    def fromJson[T](json: JsValue): DoubleArray[T] = {
+      implicit def read: Reads[DoubleArray[T]] = Json.reads[DoubleArray[T]]
+      Json.reads[DoubleArray[T]].reads(json) match {
+        case x: JsSuccess[DoubleArray[T]] => x.value
+        case e: JsError                   => throw new IllegalStateException(e.toString)
+      }
+    }
+  }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
     implicit val read: Reads[Schema] = Json.reads[Schema]
