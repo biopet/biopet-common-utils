@@ -200,48 +200,65 @@ class CountsTest extends BiopetTest {
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
+  case class TestDoubleArray(doubleArray: DoubleArray[Any], jsonString: String)
+
+  val doubleArrays: Seq[TestDoubleArray] =
+    Seq(
+      TestDoubleArray(
+        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
+        """{"values":["1","2","3"],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      ),
+      TestDoubleArray(
+        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      )
+    )
   @Test
   def testDoubleArrayToJsonSucces(): Unit = {
-    val daString = DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3))
-    Json.stringify(daString.toJson) shouldBe
-      """{"values":["1","2","3"],"counts":[1,2,3]}"""
-
-    val daInt = DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3))
-    Json.stringify(daInt.toJson) shouldBe
-      """{"values":[1,2,3],"counts":[1,2,3]}"""
-
-    val daLong = DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3))
-    Json.stringify(daLong.toJson) shouldBe
-      """{"values":[1,2,3],"counts":[1,2,3]}"""
-
-    val daFloat = DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3))
-    Json.stringify(daFloat.toJson) shouldBe
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-
-    val daDouble =
-      DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3))
-    Json.stringify(daDouble.toJson) shouldBe
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-
-    val daMixed = DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2))
-    Json.stringify(daMixed.toJson) shouldBe
-      """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
+    doubleArrays.foreach { x =>
+      Json.stringify(x.doubleArray.toJson) shouldBe x.jsonString
+    }
   }
 
   @Test
+  def testDoubleArrayFromJsonSucces(): Unit = {
+    doubleArrays.foreach { x =>
+      DoubleArray.fromJson(Json.parse(x.jsonString)) shouldBe x.doubleArray
+    }
+  }
+  @Test
   def testDoubleArrayToJsonFail(): Unit = {
+    // TODO: Implement tests that should fail when dumping to json.
+    // Cannot think of failing things that should fail right now.
+  }
+
+  @Test
+  def testDoubleArrayFail(): Unit = {
     intercept[IllegalArgumentException] {
       val daLengthMisMatch = DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
     }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
   }
 
   @Test
-  def testDoubleArrayFromJsonSucces(): Unit = {
-    val json = Json.parse("""{"values":["1","2","3"],"counts":[1,2,3]}""")
-    DoubleArray.fromJson(json) shouldBe
-      DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3))
+  def testDoubleArrayFromJsonFail(): Unit = {
+    val test = TestDoubleArray(
+      DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2)),
+      """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
+    )
+    intercept[IllegalStateException] {
+      DoubleArray.fromJson(Json.parse(test.jsonString)) shouldBe test.doubleArray
+    }.getMessage should include("JsError")
   }
-
-  @Test
-  def testDoubleArrayFromJsonFail(): Unit = ???
 }
