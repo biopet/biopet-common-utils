@@ -29,6 +29,7 @@ import org.testng.annotations.Test
 import play.api.libs.json.Json
 
 import scala.io.Source
+import scala.reflect.internal.MissingRequirementError
 
 /**
   * Created by pjvan_thof on 19-7-16.
@@ -221,10 +222,18 @@ class CountsTest extends BiopetTest {
       DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3))
     Json.stringify(daDouble.toJson) shouldBe
       """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+
+    val daMixed = DoubleArray(IndexedSeq(2,3L,"bla"), IndexedSeq(0,1,2))
+    Json.stringify(daMixed.toJson) shouldBe
+      """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
   }
 
   @Test
-  def testDoubleArrayToJsonFail(): Unit = ???
+  def testDoubleArrayToJsonFail(): Unit = {
+    intercept[IllegalArgumentException] {
+      val daLengthMisMatch = DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
+    }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
+  }
 
   @Test
   def testDoubleArrayFromJsonSucces(): Unit = ???

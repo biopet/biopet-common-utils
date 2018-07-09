@@ -207,7 +207,7 @@ object Counts {
   }
 
   object DoubleArray {
-    def fromJson[T](jsValue: JsValue): DoubleArray[T] = ???
+    def fromJson[T](json: JsValue): DoubleArray[T] = ???
   }
 
   def mapFromJson(json: JsValue): Map[String, Long] = {
