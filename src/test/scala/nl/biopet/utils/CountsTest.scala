@@ -223,7 +223,7 @@ class CountsTest extends BiopetTest {
     Json.stringify(daDouble.toJson) shouldBe
       """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
 
-    val daMixed = DoubleArray(IndexedSeq(2,3L,"bla"), IndexedSeq(0,1,2))
+    val daMixed = DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2))
     Json.stringify(daMixed.toJson) shouldBe
       """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
   }
@@ -236,7 +236,11 @@ class CountsTest extends BiopetTest {
   }
 
   @Test
-  def testDoubleArrayFromJsonSucces(): Unit = ???
+  def testDoubleArrayFromJsonSucces(): Unit = {
+    val json = Json.parse("""{"values":["1","2","3"],"counts":[1,2,3]}""")
+    DoubleArray.fromJson(json) shouldBe
+      DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3))
+  }
 
   @Test
   def testDoubleArrayFromJsonFail(): Unit = ???

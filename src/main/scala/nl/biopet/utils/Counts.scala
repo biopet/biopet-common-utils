@@ -165,26 +165,41 @@ object Counts {
             }
           }))
       }
-    implicit def readsAny[T]: Reads[T] =
-      new Reads[T] {
-        def reads(json: JsValue): JsResult[T] =
-          List(json.validate[Int],
-               json.validate[Float],
-               json.validate[Double],
-               json.validate[Long],
-               json.validate[String])
-            .filter(_.isSuccess)
-            .headOption
-            .getOrElse(throw new IllegalStateException(""))
-            .map(
-              _ match {
-                case a: T => a
-              }
-            )
+
+    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] = {
+      new Reads[IndexedSeq[T]] {
+        def reads(json: JsValue): JsResult[IndexedSeq[T]] = {
+          // First evaluate if it can be parsed as an index holding a simple type
+          List(json.validate[List[Int]],
+               json.validate[List[Long]],
+               json.validate[List[Double]],
+               json.validate[List[String]]).find(_.isSuccess) match {
+            case Some(JsSuccess(value: List[T], path)) =>
+              JsSuccess(value.toIndexedSeq, path)
+            case _ => JsError()
+          }
+        }
       }
+    }
 
     implicit def doubleArrayReads[T]: Reads[Counts.DoubleArray[T]] =
-      Json.reads[Counts.DoubleArray[T]]
+      new Reads[Counts.DoubleArray[T]] {
+        def reads(json: JsValue): JsResult[DoubleArray[T]] = {
+          json match {
+            case o: JsObject =>
+              val values: JsResult[IndexedSeq[T]] =
+                o.value("values").validate[IndexedSeq[T]]
+              val counts: JsResult[IndexedSeq[Long]] =
+                o.value("counts").validate[IndexedSeq[Long]]
+              JsSuccess(
+                DoubleArray(
+                  values.getOrElse(throw new IllegalStateException("")),
+                  counts.getOrElse(throw new IllegalStateException(""))))
+
+            case _ => throw new IllegalStateException("Not a object")
+          }
+        }
+      }
 
     implicit def doubleArrayWrites[T]: Writes[Counts.DoubleArray[T]] =
       Json.writes[Counts.DoubleArray[T]]
@@ -209,9 +224,9 @@ object Counts {
   object DoubleArray {
     def fromJson[T](json: JsValue): DoubleArray[T] = {
       implicit def read: Reads[DoubleArray[T]] = Json.reads[DoubleArray[T]]
-      Json.reads[DoubleArray[T]](json) match {
+      Json.reads[DoubleArray[T]].reads(json) match {
         case x: JsSuccess[DoubleArray[T]] => x.value
-        case e: JsError => throw new IllegalStateException(e.toString)
+        case e: JsError                   => throw new IllegalStateException(e.toString)
       }
     }
   }
