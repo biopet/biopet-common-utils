@@ -24,9 +24,7 @@ package nl.biopet.utils
 import java.io.File
 
 import nl.biopet.test.BiopetTest
-import nl.biopet.utils.Counts.DoubleArray
-import org.testng.annotations.{DataProvider, Test}
-import play.api.libs.json.Json
+import org.testng.annotations.Test
 
 import scala.io.Source
 
@@ -201,62 +199,4 @@ class CountsTest extends BiopetTest {
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
-  @DataProvider(name = "validDoubleArrays")
-  def validDoubleArrays(): Array[Array[Any]] = {
-    Array(
-      Array(
-        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-        """{"values":["1","2","3"],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      )
-    )
-  }
-  @Test(dataProvider = "validDoubleArrays")
-  def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
-                                  jsonString: String): Unit = {
-    Json.stringify(doubleArray.toJson) shouldBe jsonString
-  }
-
-  @Test(dataProvider = "validDoubleArrays")
-  def testDoubleArrayFromJsonSucces(doubleArray: DoubleArray[Any],
-                                    jsonString: String): Unit = {
-    DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
-  }
-  @Test
-  def testDoubleArrayToJsonFail(): Unit = {
-    // TODO: Implement tests that should fail when dumping to json.
-    // Cannot think of failing things that should fail right now.
-  }
-
-  @Test
-  def testDoubleArrayFail(): Unit = {
-    intercept[IllegalArgumentException] {
-      DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
-    }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
-  }
-
-  @Test
-  def testDoubleArrayFromJsonFail(): Unit = {
-    val doubleArray = DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2))
-    val jsonString = """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
-
-    intercept[IllegalStateException] {
-      DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
-    }.getMessage should include("JsError")
-  }
 }

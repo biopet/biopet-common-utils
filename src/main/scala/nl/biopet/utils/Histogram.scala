@@ -105,7 +105,7 @@ object Histogram {
     }
   }
 
-  def fromDoubleArray[T](doubleArray: Counts.DoubleArray[T])(
+  def fromDoubleArray[T](doubleArray: DoubleArray[T])(
       implicit ord: Numeric[T]): Histogram[T] = {
     new Histogram[T](doubleArray.toMap)
   }
