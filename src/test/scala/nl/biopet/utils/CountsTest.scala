@@ -25,11 +25,11 @@ import java.io.File
 
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.Counts.DoubleArray
+import org.scalatest.Assertion
 import org.testng.annotations.{DataProvider, Test}
 import play.api.libs.json.Json
 
 import scala.io.Source
-import scala.reflect.internal.MissingRequirementError
 
 /**
   * Created by pjvan_thof on 19-7-16.
@@ -203,34 +203,39 @@ class CountsTest extends BiopetTest {
   }
 
   @DataProvider(name = "validDoubleArrays")
-  def validDoubleArrays() = {
+  def validDoubleArrays(): Array[Array[Any]] = {
     Array(
-      Array[Object](
-        (DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-         """{"values":["1","2","3"],"counts":[1,2,3]}"""),
-        (DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-         """{"values":[1,2,3],"counts":[1,2,3]}"""),
-        (DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-         """{"values":[1,2,3],"counts":[1,2,3]}"""),
-        (
-          DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-          """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-        ),
-        (
-          DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
-          """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-        )
-      ))
+      Array(
+        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
+        """{"values":["1","2","3"],"counts":[1,2,3]}"""
+      ),
+      Array(
+        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      Array(
+        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
+        """{"values":[1,2,3],"counts":[1,2,3]}"""
+      ),
+      Array(
+        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      ),
+      Array(
+        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
+        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      )
+    )
   }
   @Test(dataProvider = "validDoubleArrays")
-  def testDoubleArrayToJsonSucces[T](doubleArray: DoubleArray[T],
-                                     jsonString: String) = {
+  def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
+                                     jsonString: String): Assertion = {
     Json.stringify(doubleArray.toJson) shouldBe jsonString
   }
 
-  @Test
-  def testDoubleArrayFromJsonSucces[T](doubleArray: DoubleArray[T],
-                                       jsonString: String) = {
+  @Test(dataProvider = "validDoubleArrays")
+  def testDoubleArrayFromJsonSucces(doubleArray: DoubleArray[Any],
+                                       jsonString: String): Assertion = {
     DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
   }
   @Test
@@ -242,7 +247,7 @@ class CountsTest extends BiopetTest {
   @Test
   def testDoubleArrayFail(): Unit = {
     intercept[IllegalArgumentException] {
-      val daLengthMisMatch = DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
+      DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
     }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
   }
 
