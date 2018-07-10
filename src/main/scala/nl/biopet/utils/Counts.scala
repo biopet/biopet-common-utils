@@ -171,20 +171,14 @@ object Counts {
 
     /**
       * Method to write an indexedSeq to json.
+      *
       * @tparam T IndexedSeq can be of any type.
       * @return A Writes object
       */
     implicit def indexedSeqWrites[T]: Writes[IndexedSeq[T]] =
       new Writes[IndexedSeq[T]] {
         def writes(indexedSeq: IndexedSeq[T]): JsValue =
-          anyToJson(indexedSeq.toList.flatMap(x => {
-            val json = anyToJson(x)
-            json match {
-              case JsNull =>
-                throw new IllegalStateException("List element may not be null")
-              case _ => Some(json)
-            }
-          }))
+          anyToJson(indexedSeq.toList.map(anyToJson))
       }
 
     /**
@@ -199,11 +193,14 @@ object Counts {
           List(json.validate[List[Int]],
                json.validate[List[Long]],
                json.validate[List[Double]],
-               json.validate[List[String]]).find(_.isSuccess) match {
-            case Some(JsSuccess(value: List[T], path)) =>
-              JsSuccess(value.toIndexedSeq, path)
-            case _ => JsError()
-          }
+               json.validate[List[String]])
+            .flatMap {
+              case JsSuccess(value: List[T], path) =>
+                Some(JsSuccess(value.toIndexedSeq, path))
+              case _ => None
+            }
+            .headOption
+            .getOrElse(JsError())
         }
       }
     }
@@ -224,8 +221,11 @@ object Counts {
                 o.value("counts").validate[IndexedSeq[Long]]
               JsSuccess(
                 DoubleArray(
-                  values.getOrElse(throw new IllegalStateException("")),
-                  counts.getOrElse(throw new IllegalStateException(""))))
+                  values.getOrElse(throw new IllegalStateException(
+                    "Values could not be parsed from json file.")),
+                  counts.getOrElse(throw new IllegalStateException(
+                    "Counts could not be parsed from json file."))
+                ))
 
             case _ => throw new IllegalStateException("Not a object")
           }
@@ -276,7 +276,7 @@ object Counts {
 
   /**
     * Create a map[String,Long] using the schema
-    * @param json
+    * @param json the jsvalue
     * @return a map.
     */
   def mapFromJson(json: JsValue): Map[String, Long] = {

@@ -195,8 +195,10 @@ class CountsTest extends BiopetTest {
   def testToDoubleArray(): Unit = {
     val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
     val doubleArray = c1.toDoubleArray
-    doubleArray.values.toSet shouldBe Set("1", "2", "3")
-    doubleArray.counts.toSet shouldBe Set(1, 2, 3)
+    doubleArray.values.zip(doubleArray.counts).sortBy { case (x, _) => x } shouldBe IndexedSeq(
+      ("1", 1),
+      ("2", 2),
+      ("3", 3))
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
