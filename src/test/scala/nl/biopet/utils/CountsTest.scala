@@ -25,7 +25,6 @@ import java.io.File
 
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.Counts.DoubleArray
-import org.scalatest.Assertion
 import org.testng.annotations.{DataProvider, Test}
 import play.api.libs.json.Json
 
@@ -229,13 +228,13 @@ class CountsTest extends BiopetTest {
   }
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
-                                     jsonString: String): Assertion = {
+                                  jsonString: String): Unit = {
     Json.stringify(doubleArray.toJson) shouldBe jsonString
   }
 
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayFromJsonSucces(doubleArray: DoubleArray[Any],
-                                       jsonString: String): Assertion = {
+                                    jsonString: String): Unit = {
     DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
   }
   @Test
