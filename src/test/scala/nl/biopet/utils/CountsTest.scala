@@ -25,7 +25,7 @@ import java.io.File
 
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.Counts.DoubleArray
-import org.testng.annotations.Test
+import org.testng.annotations.{DataProvider, Test}
 import play.api.libs.json.Json
 
 import scala.io.Source
@@ -202,48 +202,36 @@ class CountsTest extends BiopetTest {
     Counts.fromDoubleArray(doubleArray) shouldBe c1
   }
 
-  /**
-    * Case class that can be used for easy testing of multiple doubleArray's.
-    * @param doubleArray
-    * @param jsonString
-    */
-  case class TestDoubleArray(doubleArray: DoubleArray[Any], jsonString: String)
-
-  val doubleArrays: Seq[TestDoubleArray] =
-    Seq(
-      TestDoubleArray(
-        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-        """{"values":["1","2","3"],"counts":[1,2,3]}"""
-      ),
-      TestDoubleArray(
-        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      TestDoubleArray(
-        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      TestDoubleArray(
-        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      ),
-      TestDoubleArray(
-        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      )
-    )
-  @Test
-  def testDoubleArrayToJsonSucces(): Unit = {
-    doubleArrays.foreach { x =>
-      Json.stringify(x.doubleArray.toJson) shouldBe x.jsonString
-    }
+  @DataProvider(name = "validDoubleArrays")
+  def validDoubleArrays() = {
+    Array(
+      Array[Object](
+        (DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
+         """{"values":["1","2","3"],"counts":[1,2,3]}"""),
+        (DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
+         """{"values":[1,2,3],"counts":[1,2,3]}"""),
+        (DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
+         """{"values":[1,2,3],"counts":[1,2,3]}"""),
+        (
+          DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
+          """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+        ),
+        (
+          DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
+          """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+        )
+      ))
+  }
+  @Test(dataProvider = "validDoubleArrays")
+  def testDoubleArrayToJsonSucces[T](doubleArray: DoubleArray[T],
+                                     jsonString: String) = {
+    Json.stringify(doubleArray.toJson) shouldBe jsonString
   }
 
   @Test
-  def testDoubleArrayFromJsonSucces(): Unit = {
-    doubleArrays.foreach { x =>
-      DoubleArray.fromJson(Json.parse(x.jsonString)) shouldBe x.doubleArray
-    }
+  def testDoubleArrayFromJsonSucces[T](doubleArray: DoubleArray[T],
+                                       jsonString: String) = {
+    DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
   }
   @Test
   def testDoubleArrayToJsonFail(): Unit = {
@@ -260,12 +248,11 @@ class CountsTest extends BiopetTest {
 
   @Test
   def testDoubleArrayFromJsonFail(): Unit = {
-    val test = TestDoubleArray(
-      DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2)),
-      """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
-    )
+    val doubleArray = DoubleArray(IndexedSeq(2, 3L, "bla"), IndexedSeq(0, 1, 2))
+    val jsonString = """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
+
     intercept[IllegalStateException] {
-      DoubleArray.fromJson(Json.parse(test.jsonString)) shouldBe test.doubleArray
+      DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
     }.getMessage should include("JsError")
   }
 }
