@@ -67,6 +67,10 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     writer.close()
   }
 
+  /**
+    * Create a summary map.
+    * @return Map of values and counts.
+    */
   def toSummaryMap: Map[String, List[Any]] = {
     val values = counts.keySet.toList.sortWith(sortAnyAny)
     Map("values" -> values, "counts" -> values.map(counts(_)))
@@ -97,9 +101,27 @@ class Counts[T](c: Map[T, Long] = Map[T, Long]())(implicit ord: Ordering[T])
     counts.values.sum
   }
 
+  /**
+    * Transcribe countmap into json.
+    * @return A json of the counts and values
+    */
   def toJson: JsValue = {
     conversions.mapToJson(counts.map { case (k, v) => k.toString -> v }.toMap)
   }
+
+  /**
+    * Converts to two IndexedSeqs, one containing values, and one containing counts.
+    * @return Returns a doubleArray
+    */
+  def toDoubleArray: DoubleArray[T] = {
+    val (keySeq, countSeq) =
+      counts.foldLeft((IndexedSeq[T](), IndexedSeq[Long]())) {
+        case ((keyList, countList), (key, count)) =>
+          (keyList :+ key, countList :+ count)
+      }
+    DoubleArray(keySeq, countSeq)
+  }
+
 }
 
 object Counts {
@@ -130,13 +152,19 @@ object Counts {
     writer.close()
   }
 
-  private case class Schema(map: Map[String, Long])
-
-  def mapFromJson(json: JsValue): Map[String, Long] = {
-    implicit val read: Reads[Schema] = Json.reads[Schema]
-    Json.reads[Schema].reads(json) match {
-      case x: JsSuccess[Schema] => x.value.map
-      case e: JsError           => throw new IllegalStateException(e.toString)
-    }
+  /**
+    * Converts a doublearray into a counts object
+    *
+    * @param doubleArray the doubleArray
+    * @param ord         Implicit ordering
+    * @tparam T The type of the items in the values list.
+    * @return A counts object.
+    */
+  def fromDoubleArray[T](doubleArray: DoubleArray[T])(
+      implicit ord: Ordering[T]): Counts[T] = {
+    new Counts[T](doubleArray.toMap)
   }
+
+  case class Schema(map: Map[String, Long])
+
 }

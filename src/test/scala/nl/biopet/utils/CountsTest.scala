@@ -24,8 +24,6 @@ package nl.biopet.utils
 import java.io.File
 
 import nl.biopet.test.BiopetTest
-import org.scalatest.Matchers
-import org.scalatest.testng.TestNGSuite
 import org.testng.annotations.Test
 
 import scala.io.Source
@@ -189,4 +187,16 @@ class CountsTest extends BiopetTest {
     c1.acumolateCounts() shouldBe Map(1 -> 1, 2 -> 3, 3 -> 6)
     c1.acumolateCounts(true) shouldBe Map(1 -> 6, 2 -> 5, 3 -> 3)
   }
+
+  @Test
+  def testToDoubleArray(): Unit = {
+    val c1 = new Counts[String](Map("1" -> 1, "2" -> 2, "3" -> 3))
+    val doubleArray = c1.toDoubleArray
+    doubleArray.values.zip(doubleArray.counts).sortBy { case (x, _) => x } shouldBe IndexedSeq(
+      ("1", 1),
+      ("2", 2),
+      ("3", 3))
+    Counts.fromDoubleArray(doubleArray) shouldBe c1
+  }
+
 }
