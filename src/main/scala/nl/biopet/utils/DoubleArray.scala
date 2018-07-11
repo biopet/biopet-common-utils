@@ -26,6 +26,7 @@ import nl.biopet.utils.conversions.anyToJson
 import nl.biopet.utils.DoubleArray.Implicits._
 import play.api.libs.json._
 import scala.reflect.ClassTag
+
 /**
   * A class that stores a T,Long dictionary as two sequences, that can be zipped.
   *
@@ -36,7 +37,9 @@ import scala.reflect.ClassTag
 case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
   require(values.size == counts.size,
           "Values and counts do not have the same length.")
-  require(values.distinct == values, "Non-unique values detected. Values map to dictionary keys, and each key should be unique.")
+  require(values.distinct.length == values.length,
+          "Non-unique values detected. Values map to dictionary keys, " +
+            "and each key should be unique.")
 
   def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
 
@@ -89,25 +92,33 @@ object DoubleArray {
       * @tparam T Can be of type int,long,double or string
       * @return A writhe method.
       */
-    implicit def indexedSeqReads[T](implicit tag: ClassTag[T]): Reads[IndexedSeq[T]] = {
+    implicit def indexedSeqReads[T](
+        implicit tag: ClassTag[T]): Reads[IndexedSeq[T]] = {
       new Reads[IndexedSeq[T]] {
         def reads(json: JsValue): JsResult[IndexedSeq[T]] = {
           // First evaluate if it can be parsed as an index holding a simple type
           val validateResults = tag match {
             case _ if tag == ClassTag(classOf[Int]) => json.validate[List[Int]]
-            case _ if tag == ClassTag(classOf[Long]) => json.validate[List[Long]]
-            case _ if tag == ClassTag(classOf[Float]) => json.validate[List[Float]]
-            case _ if tag == ClassTag(classOf[Double]) => json.validate[List[Double]]
-            case _ if tag == ClassTag(classOf[String]) => json.validate[List[String]]
-            case _ => throw new IllegalStateException(s"Class ${tag.runtimeClass} is not supported in json")
+            case _ if tag == ClassTag(classOf[Long]) =>
+              json.validate[List[Long]]
+            case _ if tag == ClassTag(classOf[Float]) =>
+              json.validate[List[Float]]
+            case _ if tag == ClassTag(classOf[Double]) =>
+              json.validate[List[Double]]
+            case _ if tag == ClassTag(classOf[String]) =>
+              json.validate[List[String]]
+            case _ =>
+              throw new IllegalStateException(
+                s"Class ${tag.runtimeClass} is not supported in json")
           }
           validateResults match {
-            case JsSuccess(value, path) => JsSuccess(value.map {
-              case tag(x) => x
-              case _ =>
-                // This should never happen
-                throw new IllegalStateException("Wrong type found")
-            }.toIndexedSeq, path)
+            case JsSuccess(value, path) =>
+              JsSuccess(value.map {
+                case tag(x) => x
+                case _      =>
+                  // This should never happen
+                  throw new IllegalStateException("Wrong type found")
+              }.toIndexedSeq, path)
             case _ => JsError()
           }
         }
@@ -119,7 +130,8 @@ object DoubleArray {
       * @tparam T The type of the items in the values list.
       * @return a reads method.
       */
-    implicit def doubleArrayReads[T](implicit tag: ClassTag[T]): Reads[DoubleArray[T]] =
+    implicit def doubleArrayReads[T](
+        implicit tag: ClassTag[T]): Reads[DoubleArray[T]] =
       new Reads[DoubleArray[T]] {
         def reads(json: JsValue): JsResult[DoubleArray[T]] = {
           json match {

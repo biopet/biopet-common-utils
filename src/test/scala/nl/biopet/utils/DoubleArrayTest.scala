@@ -32,34 +32,42 @@ class DoubleArrayTest extends BiopetTest {
   def validDoubleArrays(): Array[Array[Any]] = Array(
     Array(
       DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-      """{"values":["1","2","3"],"counts":[1,2,3]}""", classOf[String]
+      """{"values":["1","2","3"],"counts":[1,2,3]}""",
+      classOf[String]
     ),
     Array(
       DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-      """{"values":[1,2,3],"counts":[1,2,3]}""", classOf[Int]
+      """{"values":[1,2,3],"counts":[1,2,3]}""",
+      classOf[Int]
     ),
     Array(
       DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-      """{"values":[1,2,3],"counts":[1,2,3]}""", classOf[Long]
+      """{"values":[1,2,3],"counts":[1,2,3]}""",
+      classOf[Long]
     ),
     Array(
       DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""", classOf[Double]
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""",
+      classOf[Double]
     ),
     Array(
-      DoubleArray(IndexedSeq(12345678910L, 12345678911L, 12345678912L),IndexedSeq(1,2,3)),
-      """{"values":[12345678910,12345678911,12345678912],"counts":[1,2,3]}""", classOf[Long]
+      DoubleArray(IndexedSeq(12345678910L, 12345678911L, 12345678912L),
+                  IndexedSeq(1, 2, 3)),
+      """{"values":[12345678910,12345678911,12345678912],"counts":[1,2,3]}""",
+      classOf[Long]
     )
   )
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
-                                  jsonString: String, tag: Class[_]): Unit = {
+                                  jsonString: String,
+                                  tag: Class[_]): Unit = {
     Json.stringify(doubleArray.toJson) shouldBe jsonString
   }
 
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayFromJsonSucces(doubleArray: DoubleArray[Any],
-                                    jsonString: String, tag: Class[_]): Unit = {
+                                    jsonString: String,
+                                    tag: Class[_]): Unit = {
     DoubleArray.fromJson(Json.parse(jsonString))(ClassTag(tag)) shouldBe doubleArray
   }
 
@@ -72,10 +80,18 @@ class DoubleArrayTest extends BiopetTest {
   }
 
   @Test
-  def testDoubleArrayFail(): Unit = {
+  def testDoubleArrayNotEqualLengthsFail(): Unit = {
     intercept[IllegalArgumentException] {
       DoubleArray(IndexedSeq(2, 3), IndexedSeq(1, 2, 3))
     }.getMessage shouldBe "requirement failed: Values and counts do not have the same length."
+  }
+
+  def testDoubleArrayNonUniqueValues(): Unit = {
+    intercept[IllegalArgumentException] {
+      DoubleArray[Int](IndexedSeq(1, 1), IndexedSeq(1, 2))
+    }.getMessage shouldBe
+      "requirement failed: Non-unique values detected. " +
+        "Values map to dictionary keys, and each key should be unique."
   }
 
   @Test
