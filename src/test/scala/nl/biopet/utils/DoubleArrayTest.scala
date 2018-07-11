@@ -43,10 +43,6 @@ class DoubleArrayTest extends BiopetTest {
       """{"values":[1,2,3],"counts":[1,2,3]}""", classOf[Long]
     ),
     Array(
-      DoubleArray(IndexedSeq(1.1f, 2.2f, 3.3f), IndexedSeq(1, 2, 3)),
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""", classOf[Float]
-    ),
-    Array(
       DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
       """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""", classOf[Double]
     ),
@@ -88,7 +84,7 @@ class DoubleArrayTest extends BiopetTest {
     val jsonString = """{"values":[2,3,"bla"],"counts":[0,1,2]}"""
 
     intercept[IllegalStateException] {
-      DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
+      DoubleArray.fromJson[Int](Json.parse(jsonString)) shouldBe doubleArray
     }.getMessage should include("JsError")
   }
 }
