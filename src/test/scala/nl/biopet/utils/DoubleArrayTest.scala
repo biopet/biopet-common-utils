@@ -25,44 +25,46 @@ import nl.biopet.test.BiopetTest
 import org.testng.annotations.{DataProvider, Test}
 import play.api.libs.json.Json
 
+import scala.reflect.ClassTag
+
 class DoubleArrayTest extends BiopetTest {
   @DataProvider(name = "validDoubleArrays")
   def validDoubleArrays(): Array[Array[Any]] = Array(
     Array(
       DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-      """{"values":["1","2","3"],"counts":[1,2,3]}"""
+      """{"values":["1","2","3"],"counts":[1,2,3]}""", classOf[String]
     ),
     Array(
       DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-      """{"values":[1,2,3],"counts":[1,2,3]}"""
+      """{"values":[1,2,3],"counts":[1,2,3]}""", classOf[Int]
     ),
     Array(
       DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-      """{"values":[1,2,3],"counts":[1,2,3]}"""
+      """{"values":[1,2,3],"counts":[1,2,3]}""", classOf[Long]
+    ),
+    Array(
+      DoubleArray(IndexedSeq(1.1f, 2.2f, 3.3f), IndexedSeq(1, 2, 3)),
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""", classOf[Float]
     ),
     Array(
       DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-    ),
-    Array(
-      DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
-      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}""", classOf[Double]
     ),
     Array(
       DoubleArray(IndexedSeq(12345678910L, 12345678911L, 12345678912L),IndexedSeq(1,2,3)),
-      """{"values":[12345678910,12345678911,12345678912],"counts":[1,2,3]}"""
+      """{"values":[12345678910,12345678911,12345678912],"counts":[1,2,3]}""", classOf[Long]
     )
   )
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
-                                  jsonString: String): Unit = {
+                                  jsonString: String, tag: Class[_]): Unit = {
     Json.stringify(doubleArray.toJson) shouldBe jsonString
   }
 
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayFromJsonSucces(doubleArray: DoubleArray[Any],
-                                    jsonString: String): Unit = {
-    DoubleArray.fromJson(Json.parse(jsonString)) shouldBe doubleArray
+                                    jsonString: String, tag: Class[_]): Unit = {
+    DoubleArray.fromJson(Json.parse(jsonString))(ClassTag(tag)) shouldBe doubleArray
   }
 
   @Test
