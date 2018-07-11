@@ -36,6 +36,7 @@ import play.api.libs.json._
 case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
   require(values.size == counts.size,
           "Values and counts do not have the same length.")
+  require(values.distinct == values, "Non-unique values detected. Values map to dictionary keys, and each key should be unique.")
 
   def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
 

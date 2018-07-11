@@ -27,30 +27,32 @@ import play.api.libs.json.Json
 
 class DoubleArrayTest extends BiopetTest {
   @DataProvider(name = "validDoubleArrays")
-  def validDoubleArrays(): Array[Array[Any]] = {
+  def validDoubleArrays(): Array[Array[Any]] = Array(
     Array(
-      Array(
-        DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
-        """{"values":["1","2","3"],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
-        """{"values":[1,2,3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      ),
-      Array(
-        DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
-        """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
-      )
+      DoubleArray(IndexedSeq("1", "2", "3"), IndexedSeq(1, 2, 3)),
+      """{"values":["1","2","3"],"counts":[1,2,3]}"""
+    ),
+    Array(
+      DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)),
+      """{"values":[1,2,3],"counts":[1,2,3]}"""
+    ),
+    Array(
+      DoubleArray(IndexedSeq(1L, 2L, 3L), IndexedSeq(1, 2, 3)),
+      """{"values":[1,2,3],"counts":[1,2,3]}"""
+    ),
+    Array(
+      DoubleArray(IndexedSeq(1.1, 2.2, 3.3), IndexedSeq(1, 2, 3)),
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+    ),
+    Array(
+      DoubleArray(IndexedSeq(1.1D, 2.2D, 3.3D), IndexedSeq(1, 2, 3)),
+      """{"values":[1.1,2.2,3.3],"counts":[1,2,3]}"""
+    ),
+    Array(
+      DoubleArray(IndexedSeq(12345678910L, 12345678911L, 12345678912L),IndexedSeq(1,2,3)),
+      """{"values":[12345678910,12345678911,12345678912],"counts":[1,2,3]}"""
     )
-  }
+  )
   @Test(dataProvider = "validDoubleArrays")
   def testDoubleArrayToJsonSucces(doubleArray: DoubleArray[Any],
                                   jsonString: String): Unit = {
