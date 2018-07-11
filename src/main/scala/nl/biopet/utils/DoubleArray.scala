@@ -25,7 +25,7 @@ import nl.biopet.utils.Counts.Schema
 import nl.biopet.utils.conversions.anyToJson
 import nl.biopet.utils.DoubleArray.Implicits._
 import play.api.libs.json._
-
+import scala.reflect.runtime.universe.TypeTag
 /**
   * A class that stores a T,Long dictionary as two sequences, that can be zipped.
   *
@@ -50,7 +50,7 @@ object DoubleArray {
     * @tparam T The type of the items in the value list.
     * @return a DoubleArray
     */
-  def fromJson[T](json: JsValue): DoubleArray[T] = {
+  def fromJson[T](json: JsValue)(implicit tag: TypeTag[T]): DoubleArray[T] = {
     implicit def read: Reads[DoubleArray[T]] = Json.reads[DoubleArray[T]]
     Json.reads[DoubleArray[T]].reads(json) match {
       case x: JsSuccess[DoubleArray[T]] => x.value
@@ -89,7 +89,7 @@ object DoubleArray {
       * @tparam T Can be of type int,long,double or string
       * @return A writhe method.
       */
-    implicit def indexedSeqReads[T]: Reads[IndexedSeq[T]] = {
+    implicit def indexedSeqReads[T](implicit tag: TypeTag[T]): Reads[IndexedSeq[T]] = {
       new Reads[IndexedSeq[T]] {
         def reads(json: JsValue): JsResult[IndexedSeq[T]] = {
           // First evaluate if it can be parsed as an index holding a simple type
@@ -113,7 +113,7 @@ object DoubleArray {
       * @tparam T The type of the items in the values list.
       * @return a reads method.
       */
-    implicit def doubleArrayReads[T]: Reads[DoubleArray[T]] =
+    implicit def doubleArrayReads[T](implicit tag: TypeTag[T]): Reads[DoubleArray[T]] =
       new Reads[DoubleArray[T]] {
         def reads(json: JsValue): JsResult[DoubleArray[T]] = {
           json match {
