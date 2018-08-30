@@ -103,4 +103,12 @@ class DoubleArrayTest extends BiopetTest {
       DoubleArray.fromJson[Int](Json.parse(jsonString)) shouldBe doubleArray
     }.getMessage should include("JsError")
   }
+
+  @Test
+  def testDoubleArrayEquals(): Unit = {
+    // Order should not matter. 3->3, 2->2 , 1->1 so these are equal.
+    DoubleArray(IndexedSeq(1, 2, 3), IndexedSeq(1, 2, 3)) == DoubleArray(
+      IndexedSeq(3, 2, 1),
+      IndexedSeq(3, 2, 1)) shouldBe true
+  }
 }
