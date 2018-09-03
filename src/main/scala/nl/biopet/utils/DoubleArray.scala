@@ -44,7 +44,12 @@ case class DoubleArray[T](values: IndexedSeq[T], counts: IndexedSeq[Long]) {
   def toMap: Map[T, Long] = this.values.zip(this.counts).toMap
 
   def toJson: JsValue = Json.toJson(this)
+
+  def ==(other: DoubleArray[T]): Boolean = {
+    this.toMap == other.toMap
+  }
 }
+
 object DoubleArray {
 
   /**
